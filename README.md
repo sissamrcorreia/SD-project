@@ -1,29 +1,24 @@
 # TupleSpaces
 
 Distributed Systems Project 2025
+**Group A28**
 
-*(fill the line below with the group identifier, for example A25 or T25, and then delete this line)*  
-**Group GXX**
-
-*(choose one of the following levels and erase the other one)*  
+*(choose one of the following levels and erase the other one)*
 **Difficulty level: I am Death incarnate! | Bring 'em on!**
-
 
 ### Code Identification
 
 In all source files (namely in the *groupId*s of the POMs), replace __GXX__ with your group identifier. The group
-identifier consists of either A or T followed by the group number - always two digits. This change is important for 
+identifier consists of either A or T followed by the group number - always two digits. This change is important for
 code dependency management, to ensure your code runs using the correct components and not someone else's.
 
 ### Team Members
 
-*(fill the table below with the team members, and then delete this line)*
-
-| Number | Name              | User                             | Email                               |
-|--------|-------------------|----------------------------------|-------------------------------------|
-| 11111  | Alice Distributed | <https://github.com/AliceUser>   | <mailto:alice@tecnico.ulisboa.pt>   |
-| 22222  | Bob Systems       | <https://github.com/BobUser>     | <mailto:bob@tecnico.ulisboa.pt>     |
-| 33333  | Charlie Rules     | <https://github.com/CharlieUser> | <mailto:charlie@tecnico.ulisboa.pt> |
+| Number | Name                               | User                                                                | Email                                                                                  |
+| ------ | ---------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 105901 | Francisca Vicente de Almeida       | [https://github.com/Francisca105](https://github.com/Francisca105)     | [mailto:francisca.vicente.de.almeida@tecnico.ulisboa.pt](mailto:alice@tecnico.ulisboa.pt) |
+| 106326 | Guilherme Augusto Arrais Filipe    | [https://github.com/WhiteSoxx](https://github.com/WhiteSoxx)           | [mailto:guilherme.filipe@tecnico.ulisboa.pt](mailto:guilherme.filipe@tecnico.ulisboa.pt)  |
+| 106827 | Cecília Maria Rodrigues Correia | [https://github.com/sissamrcorreia](https://github.com/sissamrcorreia) | [mailto:cecilia.correia@tecnico.ulisboa.pt](mailto:cecilia.correia@tecnico.ulisboa.pt)    |
 
 ## Getting Started
 
