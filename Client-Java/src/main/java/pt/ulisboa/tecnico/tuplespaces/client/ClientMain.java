@@ -2,9 +2,11 @@ package pt.ulisboa.tecnico.tuplespaces.client;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.StatusRuntimeException;
+// import io.grpc.StatusRuntimeException;
 
-import pt.ulisboa.tecnico.SingleServer.contract.SingleServerGrpc;
+
+// import pt.ulisboa.tecnico.SingleServer.contract.SingleServerGrpc;
+// import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
 
 import pt.ulisboa.tecnico.tuplespaces.client.grcp.ClientService;
 
@@ -13,7 +15,7 @@ public class ClientMain {
     public static void main(String[] args) {
 
         /** Set flag to true to print debug messages. 
-	    * The flag can be set using the -Ddebug command line option. */
+	    * The flag can be set using the -Ddebug command line option. fixme */
 	    //private static final boolean DEBUG_FLAG = (System.getProperty("debug") != null); //fix
 
         /** Helper method to print debug messages. */
@@ -40,11 +42,23 @@ public class ClientMain {
         // get the host and the port of the server or front-end
         final String host_port = args[0];
         final int client_id = Integer.parseInt(args[1]);
-        final String target = host_port + ":" + client_id;
+        final String target = host_port;
+        System.out.println("host_port: " + host_port);
+        System.out.println("client_id: " + client_id);
+        System.out.println("target: " + target);
 
-        ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
-        SingleServerGrpc.SingleServerBlockingStub stub = SingleServerGrpc.newBlockingStub(channel);
+        // Channel is the abstraction to connect to a service endpoint.
+		// Let us use plaintext communication because we do not have certificates.
+        final ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
 
+        // It is up to the client to determine whether to block the call.
+		// Here we create a blocking stub, but an async stub,
+		// or an async stub with Future are always possible.
+        // TupleSpacesGrpc.TupleSpacesBlockingStub stub = TupleSpacesGrpc.newBlockingStub(channel);
+
+        //fixme
+
+        // A Channel should be shutdown before stopping the process.
         channel.shutdown();
 
         CommandProcessor parser = new CommandProcessor(new ClientService(host_port, client_id));

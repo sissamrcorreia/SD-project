@@ -95,6 +95,7 @@ public class CommandProcessor {
 
         // read the tuple
         String result = this.clientService.read(tuple);
+        System.out.println("bababui " + result);
 
         // print the result if
         if (result != null) {
@@ -116,19 +117,19 @@ public class CommandProcessor {
         }
         
         // get the tuple
-        String tuple = split[1];
+        // String tuple = split[1];
 
         // take the tuple
-        String response = this.clientService.take(tuple);
+        // String response = this.clientService.take(tuple);
 
-        if (response != null) {
-            System.out.println("TODO: implement take command");
-            //System.out.println("OK");
-            //System.out.println(response);
-        } else {
-            //break; //fix
-            return;
-        }
+        // if (response != null) {
+        //     System.out.println("TODO: implement take command");
+        //     //System.out.println("OK");
+        //     //System.out.println(response);
+        // } else {
+        //     //break; //fix
+        //     return;
+        // }
     }
 
     private void getTupleSpacesState(){

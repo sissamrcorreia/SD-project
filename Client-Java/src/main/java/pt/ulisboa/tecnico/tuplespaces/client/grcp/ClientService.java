@@ -13,16 +13,18 @@ import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc.TupleSpacesBlockingStub;
 
 public class ClientService {
-  private final int client_id;
+  private final TupleSpacesBlockingStub stub;
 
   public ClientService(String host_port, int client_id) {
     // Channel is the abstraction to connect to a service endpoint.
 		// Let us use plaintext communication because we do not have certificates.
 		//final ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
+    final ManagedChannel channel = ManagedChannelBuilder.forTarget(host_port).usePlaintext().build();
 
 		// It is up to the client to determine whether to block the call.
 		// Here we create a blocking stub, but an async stub.
     //TupleSpacesBlockingStub stub = TupleSpaceServiceGrpc.newBlockingStub(channel);
+    this.stub = TupleSpacesGrpc.newBlockingStub(channel);
   }
 
   // adds tuple t to the tuple space
@@ -35,8 +37,8 @@ public class ClientService {
 // This operation blocks the client until a tuple that satisfies the description exists. The tuple is not removed from the tuple space.
   public String read(String pattern) {
     ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
-    //System.out.println("read request: " + request);
-    ReadResponse response = this.stub.read(request);
+    System.out.println("read request: " + request);
+    ReadResponse response = this.stub.read(request); // TODO: Fix this
     System.out.println("read response: " + response);
     return response.getResult();
   }
