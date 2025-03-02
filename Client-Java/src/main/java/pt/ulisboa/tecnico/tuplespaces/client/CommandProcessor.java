@@ -1,8 +1,8 @@
 package pt.ulisboa.tecnico.tuplespaces.client;
 
-import pt.ulisboa.tecnico.tuplespaces.client.grpc.ClientService;
-
 import java.util.Scanner;
+
+import pt.ulisboa.tecnico.tuplespaces.client.grcp.ClientService;
 
 public class CommandProcessor {
 
@@ -76,7 +76,10 @@ public class CommandProcessor {
         String tuple = split[1];
 
         // put the tuple
+        this.clientService.put(tuple);
+        
         System.out.println("TODO: implement put command");
+        //System.out.println("OK");
 
     }
 
@@ -91,7 +94,17 @@ public class CommandProcessor {
         String tuple = split[1];
 
         // read the tuple
-        System.out.println("TODO: implement read command");
+        String result = this.clientService.read(tuple);
+
+        // print the result if
+        if (result != null) {
+            System.out.println("TODO: implement read command");
+            //System.out.println("OK");
+            //System.out.println(result);
+        } else {
+            //break; //fix
+            return;
+        }
     }
 
 
@@ -106,12 +119,22 @@ public class CommandProcessor {
         String tuple = split[1];
 
         // take the tuple
-        System.out.println("TODO: implement take command");
+        String response = this.clientService.take(tuple);
+
+        if (response != null) {
+            System.out.println("TODO: implement take command");
+            //System.out.println("OK");
+            //System.out.println(response);
+        } else {
+            //break; //fix
+            return;
+        }
     }
 
     private void getTupleSpacesState(){
-
         // get the tuple spaces state
+
+        //ArrayList<String> response = this.clientService.getTupleSpacesState(qualifier);
         System.out.println("TODO: implement getTupleSpacesState command");
 
     }
