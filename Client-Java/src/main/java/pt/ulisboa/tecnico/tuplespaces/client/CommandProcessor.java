@@ -5,7 +5,6 @@ import java.util.Scanner;
 import pt.ulisboa.tecnico.tuplespaces.client.grcp.ClientService;
 
 public class CommandProcessor {
-
     private static final String SPACE = " ";
     private static final String BGN_TUPLE = "<";
     private static final String END_TUPLE = ">";
@@ -23,7 +22,6 @@ public class CommandProcessor {
     }
 
     void parseInput() {
-
         Scanner scanner = new Scanner(System.in);
         boolean exit = false;
 
@@ -65,7 +63,6 @@ public class CommandProcessor {
     }
 
     private void put(String[] split){
-
         // check if input is valid
         if (!this.inputIsValid(split)) {
             this.printUsage();
@@ -74,13 +71,11 @@ public class CommandProcessor {
         
         // get the tuple
         String tuple = split[1];
-
+        
         // put the tuple
         this.clientService.put(tuple);
-        
-        System.out.println("TODO: implement put command");
-        //System.out.println("OK");
-
+        System.out.println("OK");
+        System.out.println();
     }
 
     private void read(String[] split){
@@ -95,49 +90,47 @@ public class CommandProcessor {
 
         // read the tuple
         String result = this.clientService.read(tuple);
-        System.out.println("bababui " + result);
 
         // print the result if
         if (result != null) {
-            System.out.println("TODO: implement read command");
-            //System.out.println("OK");
-            //System.out.println(result);
+            System.out.println("OK");
+            System.out.println(result);
         } else {
-            //break; //fix
+            // System.out.println("Tuple not found"); TODO: Check if it needs to print
             return;
         }
+        System.out.println();
     }
 
 
-    private void take(String[] split){
+    private void take(String[] split) {
          // check if input is valid
         if (!this.inputIsValid(split)) {
             this.printUsage();
             return;
         }
-        
+
         // get the tuple
-        // String tuple = split[1];
+        String tuple = split[1];
 
         // take the tuple
-        // String response = this.clientService.take(tuple);
+        String response = this.clientService.take(tuple);
 
-        // if (response != null) {
-        //     System.out.println("TODO: implement take command");
-        //     //System.out.println("OK");
-        //     //System.out.println(response);
-        // } else {
-        //     //break; //fix
-        //     return;
-        // }
+        if (response != null) {
+            System.out.println("OK");
+            System.out.println(response);
+        } else {
+            // System.out.println("Tuple not found"); TODO: Check if it needs to print
+            return;
+        }
+        System.out.println();
     }
 
-    private void getTupleSpacesState(){
+    private void getTupleSpacesState() {
         // get the tuple spaces state
+        this.clientService.getTupleSpacesState();
 
-        //ArrayList<String> response = this.clientService.getTupleSpacesState(qualifier);
-        System.out.println("TODO: implement getTupleSpacesState command");
-
+        System.out.println();
     }
 
     private void sleep(String[] split) {

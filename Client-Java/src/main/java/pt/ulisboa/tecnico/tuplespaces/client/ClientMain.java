@@ -43,9 +43,6 @@ public class ClientMain {
         final String host_port = args[0];
         final int client_id = Integer.parseInt(args[1]);
         final String target = host_port;
-        System.out.println("host_port: " + host_port);
-        System.out.println("client_id: " + client_id);
-        System.out.println("target: " + target);
 
         // Channel is the abstraction to connect to a service endpoint.
 		// Let us use plaintext communication because we do not have certificates.
