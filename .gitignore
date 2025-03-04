@@ -45,3 +45,6 @@ replay_pid*
 
 # tests
 tests/test-outputs/
+
+
+*.DS_Store
