@@ -1,21 +1,13 @@
 package pt.ulisboa.tecnico.tuplespaces.client;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-// import io.grpc.StatusRuntimeException;
-
-
-// import pt.ulisboa.tecnico.SingleServer.contract.SingleServerGrpc;
-// import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
-
 import pt.ulisboa.tecnico.tuplespaces.client.grcp.ClientService;
 
 public class ClientMain {
-    /** Set flag to true to print debug messages.
-    * The flag can be set using the -debug command line option. fixme */
+    // Set flag to true to print debug messages.
+    // The flag can be set using the -debug command line option.
     private static boolean DEBUG_FLAG = (System.getProperty("debug") != null);
 
-    /** Helper method to print debug messages. */
+    // Helper method to print debug messages.
     private static void debug(String debugMessage) {
         if (DEBUG_FLAG)
             System.err.println("[DEBUG] " + debugMessage);
@@ -25,15 +17,15 @@ public class ClientMain {
         System.out.println(ClientMain.class.getSimpleName());
 
         // receive and print arguments
-		debug(String.format("Received %d arguments", args.length));
 		for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-debug")) {
                 DEBUG_FLAG = true;
-                debug("Debugging enabled");
+                debug("Debug mode enabled");
                 continue;
             }
 			debug(String.format("arg[%d] = %s", i, args[i]));
 		}
+		debug(String.format("Received %d arguments", args.length));
 
         // check arguments
         if (args.length < 2) {

@@ -30,13 +30,13 @@ public class ClientService {
     this.stub = TupleSpacesGrpc.newBlockingStub(channel);
   }
 
-  // adds tuple t to the tuple space
+  // Adds tuple t to the tuple space
   public void put(String tuple) {
     PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
     this.stub.put(request);
   }
 
-// accepts a tuple description and returns one tuple that matches the description, if it exists.
+// Accepts a tuple description and returns one tuple that matches the description, if it exists.
 // This operation blocks the client until a tuple that satisfies the description exists. The tuple is not removed from the tuple space.
   public String read(String pattern) {
     ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
@@ -44,28 +44,25 @@ public class ClientService {
     return response.getResult();
   }
 
-  // accepts a tuple description and returns one tuple that matches the description.
+  // Accepts a tuple description and returns one tuple that matches the description.
   // This operation blocks the client until a tuple that satisfies the description exists. The tuple is removed from the tuple space.
   public String take(String pattern) {
     TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
     TakeResponse response = this.stub.take(request);
     return response.getResult();
-}
+  }
 
-  // does not take arguments and returns a list of all tuples on each server
+  // Does not take arguments and returns a list of all tuples on each server.
   public void getTupleSpacesState() {
     getTupleSpacesStateRequest request = getTupleSpacesStateRequest.newBuilder().build();
     getTupleSpacesStateResponse response = this.stub.getTupleSpacesState(request);
     ProtocolStringList TupleList = response.getTupleList();
 
-    System.out.println(TupleList.toString());
-    // for (String tuple : response.getTupleList()) {
-    //   System.out.println(tuple);
-    // }
+    System.out.println(TupleList);
   }
 
+  // A Channel should be shutdown before stopping the process.
   public void shutdown() {
-    // A Channel should be shutdown before stopping the process.
     this.channel.shutdownNow();
   }
 }
