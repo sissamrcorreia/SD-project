@@ -60,6 +60,7 @@ public class CommandProcessor {
              }
         }
         scanner.close();
+        clientService.shutdown();
     }
 
     private void put(String[] split){
@@ -68,10 +69,10 @@ public class CommandProcessor {
             this.printUsage();
             return;
         }
-        
+
         // get the tuple
         String tuple = split[1];
-        
+
         // put the tuple
         this.clientService.put(tuple);
         System.out.println("OK");
@@ -84,7 +85,7 @@ public class CommandProcessor {
             this.printUsage();
             return;
         }
-        
+
         // get the tuple
         String tuple = split[1];
 
@@ -127,6 +128,8 @@ public class CommandProcessor {
     }
 
     private void getTupleSpacesState() {
+        System.out.println("OK");
+
         // get the tuple spaces state
         this.clientService.getTupleSpacesState();
 
