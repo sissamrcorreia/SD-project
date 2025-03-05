@@ -97,7 +97,7 @@ public class CommandProcessor {
             System.out.println("OK");
             System.out.println(result);
         } else {
-            // System.out.println("Tuple not found"); TODO: Check if it needs to print
+            System.out.println("Tuple not found");
             return;
         }
         System.out.println();
@@ -121,7 +121,7 @@ public class CommandProcessor {
             System.out.println("OK");
             System.out.println(response);
         } else {
-            // System.out.println("Tuple not found"); TODO: Check if it needs to print
+            System.out.println("Tuple not found");
             return;
         }
         System.out.println();
@@ -169,12 +169,12 @@ public class CommandProcessor {
     }
 
     private boolean inputIsValid(String[] input){
-        if (input.length < 2 
+        if (input.length < 2
             ||
-            !input[1].substring(0,1).equals(BGN_TUPLE) 
-            || 
+            !input[1].substring(0,1).equals(BGN_TUPLE)
+            ||
             !input[1].endsWith(END_TUPLE)
-            || 
+            ||
             input.length > 2
             ) {
             return false;

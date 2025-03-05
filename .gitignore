@@ -48,3 +48,6 @@ tests/test-outputs/
 
 
 *.DS_Store
+
+.vscode
+.venv

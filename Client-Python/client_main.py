@@ -1,6 +1,7 @@
 import sys
 from typing import List
-from client_service import ClientService
+
+from client_service import ClientService as ClientService
 from command_processor import CommandProcessor
 
 class ClientMain:
@@ -25,7 +26,6 @@ class ClientMain:
 
         parser = CommandProcessor(ClientService(host_port, client_id))
         parser.parse_input()
-
 
 if __name__ == "__main__":
     ClientMain.main(sys.argv[1:])

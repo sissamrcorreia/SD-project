@@ -36,38 +36,73 @@ class CommandProcessor:
             except EOFError:
                 break
 
-    def put(self, split: List[str]):
-        # check if the input is valid
+
+    def put(self, split):
+        # check if input is valid
         if not self.input_is_valid(split):
             self.print_usage()
             return
 
         # get the tuple
-        tuple_data = split[1]
-        print("TODO: implement put command")
+        tuple_value = split[1]
 
-    def read(self, split: List[str]):
-        # check if the input is valid
+        # put the tuple
+        self.client_service.put(tuple_value)
+        print("OK")
+        print()
+
+
+    def read(self, split):
+        # check if input is valid
         if not self.input_is_valid(split):
             self.print_usage()
             return
 
         # get the tuple
-        tuple_data = split[1]
-        print("TODO: implement read command")
+        tuple_value = split[1]
 
-    def take(self, split: List[str]):
-        # check if the input is valid
+        # read the tuple
+        result = self.client_service.read(tuple_value)
+
+        # print the result if
+        if result is not None:
+            print("OK")
+            print(result)
+        else:
+            print("Tuple not found")
+            return
+        print()
+
+
+    def take(self, split):
+        # check if input is valid
         if not self.input_is_valid(split):
             self.print_usage()
             return
 
         # get the tuple
-        tuple_data = split[1]
-        print("TODO: implement take command")
+        tuple_value = split[1]
+
+        # take the tuple
+        response = self.client_service.take(tuple_value)
+
+        if response is not None:
+            print("OK")
+            print(response)
+        else:
+            print("Tuple not found")
+            return
+        print()
+
 
     def get_tuple_spaces_state(self):
-        print("TODO: implement getTupleSpacesState command")
+        print("OK")
+
+        # get the tuple spaces state
+        self.client_service.get_tuple_spaces_state()
+
+        print()
+
 
     def print_usage(self):
         print("Usage:\n"
