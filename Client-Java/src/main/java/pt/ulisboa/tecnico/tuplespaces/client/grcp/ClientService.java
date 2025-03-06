@@ -22,7 +22,6 @@ public class ClientService {
   public ClientService(String host_port, int client_id) {
     // Channel is the abstraction to connect to a service endpoint.
 		// Let us use plaintext communication because we do not have certificates.
-    // change here when frontend fixme
     this.channel = ManagedChannelBuilder.forTarget(host_port).usePlaintext().build();
 
 		// It is up to the client to determine whether to block the call.
@@ -36,8 +35,8 @@ public class ClientService {
     this.stub.put(request);
   }
 
-// Accepts a tuple description and returns one tuple that matches the description, if it exists.
-// This operation blocks the client until a tuple that satisfies the description exists. The tuple is not removed from the tuple space.
+  // Accepts a tuple description and returns one tuple that matches the description, if it exists.
+  // This operation blocks the client until a tuple that satisfies the description exists. The tuple is not removed from the tuple space.
   public String read(String pattern) {
     ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
     ReadResponse response = this.stub.read(request);

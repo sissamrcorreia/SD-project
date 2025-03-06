@@ -14,7 +14,6 @@ public class ServerState {
 
   public void put(String tuple) {
     tuples.add(tuple);
-    // notifyAll(); // notify all waiting threads
   }
 
   private String getMatchingTuple(String pattern) {
@@ -29,11 +28,6 @@ public class ServerState {
   public String read(String pattern) {
     String tuple = getMatchingTuple(pattern);
     while (tuple == null) {
-      // try {
-      //   wait();
-      // } catch (InterruptedException e) {
-      //   throw new RuntimeException(e);
-      // }
       tuple = getMatchingTuple(pattern);
     }
     return tuple;
@@ -42,11 +36,6 @@ public class ServerState {
   public String take(String pattern) {
     String tuple = getMatchingTuple(pattern);
     while (tuple == null) {
-      // try {
-      //   wait();
-      // } catch (InterruptedException e) {
-      //   throw new RuntimeException(e);
-      // }
       tuple = getMatchingTuple(pattern);
     }
     tuples.remove(tuple);
@@ -54,7 +43,6 @@ public class ServerState {
   }
 
   public List<String> getTupleSpacesState() {
-    // TODO
     return this.tuples;
   }
 }
