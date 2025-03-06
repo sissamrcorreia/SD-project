@@ -4,15 +4,20 @@ from typing import List
 from client_service import ClientService as ClientService
 from command_processor import CommandProcessor
 
+DEBUG_FLAG = "-debug" in sys.argv
 class ClientMain:
+    def debug(debug_message):
+        if DEBUG_FLAG:
+            print(f"[DEBUG] {debug_message}", file=sys.stderr)
+
     @staticmethod
     def main(args: List[str]):
-        print("Python Client")
+        print("ClientMain") # TODO: Check
 
         # receive and print arguments
-        print(f"Received {len(args)} arguments")
         for i, arg in enumerate(args):
-            print(f"arg[{i}] = {arg}")
+            DEBUG_FLAG = True
+            ClientMain.debug(f"arg[{i}] = {arg}")
 
         # check arguments
         if len(args) < 2:

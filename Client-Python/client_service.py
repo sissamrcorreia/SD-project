@@ -34,14 +34,16 @@ class ClientService:
     def get_tuple_spaces_state(self):
         request = getTupleSpacesStateRequest()
         response = self.stub.getTupleSpacesState(request)
-        # FIXME: Remover as aspas simples do início e do fim de cada item da lista
         tuples_list = list(response.tuple)
 
-        # Imprimir a lista completa
-        print(tuples_list)
-        # print(list(response.tuple))
+        print("[", end="")
+        for i in range(len(tuples_list)):
+            tuples_list[i] = tuples_list[i][1:-1]
+            print(f"<{tuples_list[i]}>", end="")
+            if i != len(tuples_list) - 1:
+                print(", ", end="")
+        print("]")
 
     # Shuts down the channel
     def shutdown(self):
         self.channel.close()
-
