@@ -37,41 +37,41 @@ public class ClientService {
 
   // Adds tuple t to the tuple space
   public void put(String tuple) {
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + "putting tuple " + tuple);
+    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " putting tuple " + tuple);
     PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
     this.stub.put(request);
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + "put tuple " + tuple);
+    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " put tuple " + tuple);
   }
 
   // Accepts a tuple description and returns one tuple that matches the description, if it exists.
   // This operation blocks the client until a tuple that satisfies the description exists. The tuple is not removed from the tuple space.
   public String read(String pattern) {
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + "reading tuple " + pattern);
+    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " reading tuple " + pattern);
     ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
     ReadResponse response = this.stub.read(request);
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + "read tuple with pattern " + pattern + " and got " + response.getResult());
+    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " read tuple with pattern " + pattern + " and got " + response.getResult());
     return response.getResult();
   }
 
   // Accepts a tuple description and returns one tuple that matches the description.
   // This operation blocks the client until a tuple that satisfies the description exists. The tuple is removed from the tuple space.
   public String take(String pattern) {
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + "taking tuple " + pattern);
+    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " taking tuple " + pattern);
     TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
     TakeResponse response = this.stub.take(request);
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + "take tuple with pattern " + pattern + " and got " + response.getResult());
+    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " take tuple with pattern " + pattern + " and got " + response.getResult());
     return response.getResult();
   }
 
   // Does not take arguments and returns a list of all tuples on each server.
   public void getTupleSpacesState() {
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + "getting tuple spaces state");
+    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " getting tuple spaces state");
     getTupleSpacesStateRequest request = getTupleSpacesStateRequest.newBuilder().build();
     getTupleSpacesStateResponse response = this.stub.getTupleSpacesState(request);
     ProtocolStringList TupleList = response.getTupleList();
 
     System.out.println(TupleList);
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + "got tuple spaces state");
+    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " got tuple spaces state");
   }
 
   // A Channel should be shutdown before stopping the process.

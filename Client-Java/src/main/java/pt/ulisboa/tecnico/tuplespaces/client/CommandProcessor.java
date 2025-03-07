@@ -70,10 +70,10 @@ public class CommandProcessor {
             return;
         }
 
-        ClientMain.debug(CommandProcessor.class.getSimpleName(), "put: " + split[1]);
-
         // get the tuple
         String tuple = split[1];
+
+        ClientMain.debug(CommandProcessor.class.getSimpleName(), "put: " + tuple);
 
         // put the tuple
         this.clientService.put(tuple);
@@ -90,7 +90,6 @@ public class CommandProcessor {
 
         // get the tuple
         String tuple = split[1];
-
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "read: " + tuple);
 
         // read the tuple
@@ -118,6 +117,7 @@ public class CommandProcessor {
 
         // get the tuple
         String tuple = split[1];
+        ClientMain.debug(CommandProcessor.class.getSimpleName(), "take: " + tuple);
 
         // take the tuple
         String response = this.clientService.take(tuple);
