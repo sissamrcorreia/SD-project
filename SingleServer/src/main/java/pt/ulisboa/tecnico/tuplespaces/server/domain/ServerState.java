@@ -37,9 +37,6 @@ public class ServerState {
     ServerMain.debug(ServerState.class.getSimpleName(), "Reading tuple matching pattern: " + pattern);
     String tuple = getMatchingTuple(pattern);
     while (tuple == null) {
-      tuple = getMatchingTuple(pattern);
-    }
-    while (tuple == null) {
       try {
         // release the lock and put the thread on hold
         wait();
