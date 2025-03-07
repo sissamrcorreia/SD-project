@@ -4,7 +4,7 @@ Distributed Systems Project 2025
 **Group A28**
 
 *(choose one of the following levels and erase the other one)*
-**Difficulty level: I am Death incarnate! | Bring 'em on!**
+**Difficulty level: I am Death incarnate!**
 
 ### Code Identification
 
