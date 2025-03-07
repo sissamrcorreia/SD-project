@@ -54,7 +54,7 @@ class CommandProcessor:
 
         # put the tuple
         self.client_service.put(tuple_value)
-        print("OK")
+
         print()
         Debugger.debug("put: OK")
 
@@ -76,7 +76,7 @@ class CommandProcessor:
 
         # print the result if
         if result is not None:
-            print("OK")
+
             print(result)
         else:
             print("Tuple not found")
@@ -99,7 +99,6 @@ class CommandProcessor:
         Debugger.debug("take: " + response)
 
         if response is not None:
-            print("OK")
             print(response)
         else:
             print("Tuple not found")
@@ -110,7 +109,7 @@ class CommandProcessor:
 
     def get_tuple_spaces_state(self):
         Debugger.debug("getTupleSpacesState")
-        print("OK")
+        
 
         # get the tuple spaces state
         self.client_service.get_tuple_spaces_state()

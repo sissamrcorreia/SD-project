@@ -23,7 +23,7 @@ public class ClientMain {
                 break;
             }
           }
-    
+
           if (DEBUG_FLAG) {
             args = java.util.Arrays.stream(args)
                 .filter(arg -> !arg.equals("-debug"))
@@ -35,7 +35,7 @@ public class ClientMain {
             }
           }
           debug(ClientMain.class.getSimpleName(), String.format("Received %d arguments", args.length));
-    
+
         // check arguments
         if (args.length < 2) {
             System.err.println("Argument(s) missing!");
