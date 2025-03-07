@@ -109,7 +109,6 @@ class CommandProcessor:
 
     def get_tuple_spaces_state(self):
         Debugger.debug("getTupleSpacesState")
-        
 
         # get the tuple spaces state
         self.client_service.get_tuple_spaces_state()

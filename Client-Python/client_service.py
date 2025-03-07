@@ -9,25 +9,29 @@ from debug import Debugger
 
 class ClientService:
     def __init__(self, host_port: str, client_id: int):
+        self.client_id = client_id
+
         # Create a channel to connect to the server (plaintext communication)
         self.channel = grpc.insecure_channel(host_port)
+        Debugger.debug(
+            f"Client {client_id} connected to the server at {host_port}")
 
         # Create a blocking stub for synchronous calls
         self.stub = TupleSpacesStub(self.channel)
         Debugger.debug(
-            f"Client {client_id} connected to the server at {host_port}")
+            f"Client {client_id} created a blocking stub")
 
     # Adds tuple t to the tuple space
     def put(self, tuple_str: str):
         try:
             Debugger.debug(
-                f"Client {tuple_str} added tuple {tuple_str} to the tuple space")
+                f"Client {self.client_id} added tuple {tuple_str}")
             request = PutRequest(newTuple=tuple_str)
             self.stub.put(request)
 
             print("OK")
             Debugger.debug(
-                f"Client {tuple_str} added tuple {tuple_str} to the tuple space")
+                f"Client {self.client_id} added tuple {tuple_str} to the tuple space")
         except:
             print("Server is down. Please try again later.")
 
@@ -35,38 +39,40 @@ class ClientService:
     def read(self, pattern: str) -> str:
         try:
             Debugger.debug(
-                f"Client {pattern} read tuple {pattern} from the tuple space")
+                f"Client {self.client_id} read tuple {pattern}")
             request = ReadRequest(searchPattern=pattern)
             response: ReadResponse = self.stub.read(request)
             Debugger.debug(
-                f"Client {pattern} read tuple {pattern} from the tuple space")
+                f"Client {self.client_id} read tuple {pattern}")
 
             print("OK")
             return response.result
-        except:
+
+        except grpc.RpcError as e:
             print("Server is down. Please try again later.")
 
     # Takes a tuple, removing it from the tuple space
     def take(self, pattern: str) -> str:
         try:
             Debugger.debug(
-                f"Client {pattern} took tuple {pattern} from the tuple space")
+                f"Client {self.client_id} took tuple {pattern}")
             request = TakeRequest(searchPattern=pattern)
             Debugger.debug(
-                f"Client {pattern} took tuple {pattern} from the tuple space")
+                f"Client {self.client_id} took tuple {pattern}")
             response: TakeResponse = self.stub.take(request)
             Debugger.debug(
-                f"Client {pattern} took tuple {pattern} from the tuple space")
+                f"Client {self.client_id} took tuple {pattern}")
 
             print("OK")
             return response.result
-        except:
+
+        except grpc.RpcError as e:
             print("Server is down. Please try again later.")
 
     # Gets the full tuple space state
     def get_tuple_spaces_state(self):
         try:
-            Debugger.debug("Client requested the full tuple space state")
+            Debugger.debug(f"Client {self.client_id} requested the full tuple space state")
             request = getTupleSpacesStateRequest()
             response = self.stub.getTupleSpacesState(request)
             tuples_list = list(response.tuple)
@@ -79,8 +85,9 @@ class ClientService:
                 if i != len(tuples_list) - 1:
                     print(", ", end="")
             print("]")
-            Debugger.debug("Client received the full tuple space state")
-        except:
+            Debugger.debug(f"Client {self.client_id} received the full tuple space state")
+
+        except grpc.RpcError as e:
             print("Server is down. Please try again later.")
 
     # Shuts down the channel
