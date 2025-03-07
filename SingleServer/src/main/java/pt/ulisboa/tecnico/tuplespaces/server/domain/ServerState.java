@@ -14,25 +14,23 @@ public class ServerState {
     this.tuples = new ArrayList<String>();
   }
 
-  public void put(String tuple) {
+  public synchronized void put(String tuple) {
     ServerMain.debug(ServerState.class.getSimpleName(), "Adding tuple: " + tuple);
     tuples.add(tuple);
   }
 
-  private String getMatchingTuple(String pattern) {
+  private synchronized String getMatchingTuple(String pattern) {
     for (String tuple : this.tuples) {
       if (tuple.matches(pattern)) {
         ServerMain.debug(ServerState.class.getSimpleName(), "Found tuple matching pattern: " + pattern + " -> " + tuple);
         return tuple;
       }
     }
-
     return null;
   }
 
-  public String read(String pattern) {
+  public synchronized String read(String pattern) {
     ServerMain.debug(ServerState.class.getSimpleName(), "Reading tuple matching pattern: " + pattern);
-
     String tuple = getMatchingTuple(pattern);
     while (tuple == null) {
       tuple = getMatchingTuple(pattern);
@@ -40,7 +38,7 @@ public class ServerState {
     return tuple;
   }
 
-  public String take(String pattern) {
+  public synchronized String take(String pattern) {
     ServerMain.debug(ServerState.class.getSimpleName(), "Taking tuple matching pattern: " + pattern);
     String tuple = getMatchingTuple(pattern);
     while (tuple == null) {
@@ -51,7 +49,7 @@ public class ServerState {
     return tuple;
   }
 
-  public List<String> getTupleSpacesState() {
+  public synchronized List<String> getTupleSpacesState() {
     ServerMain.debug(ServerState.class.getSimpleName(), "Returning all tuples");
     return this.tuples;
   }

@@ -28,7 +28,7 @@ public class ClientService {
     ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " connected to " + host_port);
 
 		// It is up to the client to determine whether to block the call.
-		// Here we create a blocking stub, but an async stub.
+		// Here we create a blocking stub.
     this.stub = TupleSpacesGrpc.newBlockingStub(channel);
     ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " created a blocking stub");
 
@@ -44,7 +44,7 @@ public class ClientService {
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " put tuple " + tuple);
       System.out.println("OK");
 
-    } catch (StatusRuntimeException e ) {
+    } catch (StatusRuntimeException e) {
       System.out.println("Server is down. Please try again later.");
     }
   }
@@ -61,7 +61,7 @@ public class ClientService {
       System.out.println("OK");
       return response.getResult();
 
-    } catch (StatusRuntimeException e ) {
+    } catch (StatusRuntimeException e) {
       System.out.println("Server is down. Please try again later.");
       return null;
     }
@@ -70,7 +70,7 @@ public class ClientService {
   // Accepts a tuple description and returns one tuple that matches the description.
   // This operation blocks the client until a tuple that satisfies the description exists. The tuple is removed from the tuple space.
   public String take(String pattern) {
-    try{
+    try {
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " taking tuple " + pattern);
       TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
       TakeResponse response = this.stub.take(request);
@@ -79,7 +79,7 @@ public class ClientService {
       System.out.println("OK");
       return response.getResult();
 
-    } catch (StatusRuntimeException e ) {
+    } catch (StatusRuntimeException e) {
       System.out.println("Server is down. Please try again later.");
       return null;
     }
@@ -88,14 +88,14 @@ public class ClientService {
   // Does not take arguments and returns a list of all tuples on each server.
   public void getTupleSpacesState() {
     try {
-      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " getting tuple spaces state");
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " requested the full tuple space state");
       getTupleSpacesStateRequest request = getTupleSpacesStateRequest.newBuilder().build();
       getTupleSpacesStateResponse response = this.stub.getTupleSpacesState(request);
       ProtocolStringList TupleList = response.getTupleList();
 
       System.out.println("OK");
       System.out.println(TupleList);
-      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " got tuple spaces state");
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " received the full tuple space state");
 
     } catch (StatusRuntimeException e ) {
       System.out.println("Server is down. Please try again later.");

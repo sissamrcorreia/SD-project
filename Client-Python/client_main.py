@@ -10,9 +10,12 @@ class ClientMain:
     def main(args: List[str]):
         print("ClientMain")
 
+        Debugger.debug("Debug mode enabled")
+
         # receive and print arguments
         for i, arg in enumerate(args):
             Debugger.debug(f"arg[{i}] = {arg}")
+        Debugger.debug(f"Received {len(args)} arguments")
 
         # check arguments
         if len(args) < 2:
@@ -20,7 +23,7 @@ class ClientMain:
             print("Usage: python3 client_main.py <host:port> <client_id>", file=sys.stderr)
             return
 
-        # Get the host and port of the server or front-end
+        # get the host and port of the server or front-end
         host_port = args[0]
         client_id = args[1]
         Debugger.debug(f"Client will connect to {host_port} with client_id {client_id}")
