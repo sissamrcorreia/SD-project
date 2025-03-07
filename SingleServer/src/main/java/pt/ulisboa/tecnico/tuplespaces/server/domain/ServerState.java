@@ -17,6 +17,9 @@ public class ServerState {
   public synchronized void put(String tuple) {
     ServerMain.debug(ServerState.class.getSimpleName(), "Adding tuple: " + tuple);
     tuples.add(tuple);
+
+    // notify all waiting threads
+    notifyAll();
   }
 
   private synchronized String getMatchingTuple(String pattern) {
@@ -36,6 +39,17 @@ public class ServerState {
     while (tuple == null) {
       tuple = getMatchingTuple(pattern);
     }
+    while (tuple == null) {
+      try {
+        // release the lock and put the thread on hold
+        wait();
+        // when notified, reacquire lock and try again
+        tuple = getMatchingTuple(pattern);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        return null;
+      }
+    }
     return tuple;
   }
 
@@ -43,7 +57,15 @@ public class ServerState {
     ServerMain.debug(ServerState.class.getSimpleName(), "Taking tuple matching pattern: " + pattern);
     String tuple = getMatchingTuple(pattern);
     while (tuple == null) {
-      tuple = getMatchingTuple(pattern);
+      try {
+        // release the lock and put the thread on hold
+        wait();
+        // when notified, reacquire lock and try again
+        tuple = getMatchingTuple(pattern);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        return null;
+      }
     }
     tuples.remove(tuple);
     ServerMain.debug(ServerState.class.getSimpleName(), "Removed tuple: " + tuple);
