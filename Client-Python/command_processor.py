@@ -1,5 +1,6 @@
 from typing import List
 from debug import Debugger
+import time
 
 class CommandProcessor:
     SPACE = " "
@@ -9,6 +10,7 @@ class CommandProcessor:
     READ = "read"
     TAKE = "take"
     EXIT = "exit"
+    SLEEP = "sleep"
     GET_TUPLE_SPACES_STATE = "getTupleSpacesState"
 
     def __init__(self, client_service):
@@ -31,6 +33,8 @@ class CommandProcessor:
                         self.take(split)
                     elif command == self.GET_TUPLE_SPACES_STATE:
                         self.get_tuple_spaces_state()
+                    elif command == self.SLEEP:
+                        self.sleep(split)
                     elif command == self.EXIT:
                         exit_flag = True
                     else:
@@ -107,6 +111,20 @@ class CommandProcessor:
         self.client_service.get_tuple_spaces_state()
 
         print()
+
+    def sleep(self, split):
+        if len(split) != 2:
+            self.print_usage()
+            return
+
+        try:
+            time_s = int(split[1])
+        except ValueError:
+            self.print_usage()
+            return
+
+        Debugger.debug(f"sleep: {time_s}")
+        time.sleep(time_s)
 
 
     def print_usage(self):
