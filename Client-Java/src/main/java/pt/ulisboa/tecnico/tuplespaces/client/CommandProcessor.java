@@ -70,6 +70,8 @@ public class CommandProcessor {
             return;
         }
 
+        ClientMain.debug(CommandProcessor.class.getSimpleName(), "put: " + split[1]);
+
         // get the tuple
         String tuple = split[1];
 
@@ -89,8 +91,11 @@ public class CommandProcessor {
         // get the tuple
         String tuple = split[1];
 
+        ClientMain.debug(CommandProcessor.class.getSimpleName(), "read: " + tuple);
+
         // read the tuple
         String result = this.clientService.read(tuple);
+        ClientMain.debug(CommandProcessor.class.getSimpleName(), "read: " + result);
 
         // print the result if
         if (result != null) {
@@ -116,6 +121,7 @@ public class CommandProcessor {
 
         // take the tuple
         String response = this.clientService.take(tuple);
+        ClientMain.debug(CommandProcessor.class.getSimpleName(), "take: " + response);
 
         if (response != null) {
             System.out.println("OK");
@@ -128,6 +134,7 @@ public class CommandProcessor {
     }
 
     private void getTupleSpacesState() {
+        ClientMain.debug(CommandProcessor.class.getSimpleName(), "getTupleSpacesState");
         System.out.println("OK");
 
         // get the tuple spaces state
@@ -152,6 +159,7 @@ public class CommandProcessor {
       }
 
       try {
+        ClientMain.debug(CommandProcessor.class.getSimpleName(), "sleep: " + time);
         Thread.sleep(time*1000);
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
