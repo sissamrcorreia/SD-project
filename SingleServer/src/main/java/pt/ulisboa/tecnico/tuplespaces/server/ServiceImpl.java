@@ -17,32 +17,46 @@ public class ServiceImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
 
     @Override
     public void put(PutRequest request, StreamObserver<PutResponse> responseObserver) {
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Received put request: " + request.getNewTuple());
         state.put(request.getNewTuple());
         PutResponse response = PutResponse.newBuilder().build();
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending put response");
         responseObserver.onNext(response);
         responseObserver.onCompleted();
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Put request completed");
     }
 
     @Override
     public void read(ReadRequest request, StreamObserver<ReadResponse> responseObserver) {
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Received read request: " + request.getSearchPattern());
         String tuple = state.read(request.getSearchPattern());
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending read response: " + tuple);
         ReadResponse response = ReadResponse.newBuilder().setResult(tuple).build();
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending read response: " + response);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Read request completed");
     }
 
     @Override
     public void take(TakeRequest request, StreamObserver<TakeResponse> responseObserver) {
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Received take request: " + request.getSearchPattern());
         String tuple = state.take(request.getSearchPattern());
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending take response: " + tuple);
         TakeResponse response = TakeResponse.newBuilder().setResult(tuple).build();
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending take response: " + response);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Take request completed");
     }
 
     @Override
     public void getTupleSpacesState(getTupleSpacesStateRequest request, StreamObserver<getTupleSpacesStateResponse> responseObserver) {
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Received getTupleSpacesState request");
         getTupleSpacesStateResponse response = getTupleSpacesStateResponse.newBuilder().addAllTuple(state.getTupleSpacesState()).build();
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending getTupleSpacesState response: " + response);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
+        ServerMain.debug(ServiceImpl.class.getSimpleName(), "getTupleSpacesState request completed");
     }
 }

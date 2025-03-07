@@ -12,24 +12,26 @@ public class FrontEndMain {
     private static boolean DEBUG_FLAG = (System.getProperty("debug") != null);
 
     // Helper method to print debug messages.
-    private static void debug(String debugMessage) {
+    public static void debug(String className, String debugMessage) {
         if (DEBUG_FLAG)
-            System.err.println("[DEBUG] " + debugMessage);
-    }
+            System.err.println("[DEBUG] " + className + ": " + debugMessage);
+    }  
 
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println(FrontEndMain.class.getSimpleName());
 
-        // receive and print arguments
-		for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-debug")) {
-                DEBUG_FLAG = true;
-                debug("Debug mode enabled");
+        if (DEBUG_FLAG) {
+            args = java.util.Arrays.stream(args)
+                .filter(arg -> !arg.equals("-debug"))
+                .toArray(String[]::new);
+    
+            // Receive and print arguments
+            for (int i = 0; i < args.length; i++) {
+              debug(FrontEndMain.class.getSimpleName(), String.format("arg[%d] = %s", i, args[i]));
             }
-			debug(String.format("arg[%d] = %s", i, args[i]));
-		}
-		debug(String.format("Received %d arguments", args.length));
-
+          }
+          debug(FrontEndMain.class.getSimpleName(), String.format("Received %d arguments", args.length));
+    
         // check arguments
         if (args.length < 2) {
             System.err.println("Argument(s) missing!");
@@ -43,7 +45,7 @@ public class FrontEndMain {
 
         FrontEndService Service = new FrontEndService(tupleSpacesHost_port);
 
-        debug("FrontEnd will listen on port " + port);
+        debug(FrontEndMain.class.getSimpleName(), "FrontEnd will connect to TupleSpaces on " + tupleSpacesHost_port);
 
         // Create a new server to listen on port
         Server frontEnd = ServerBuilder.forPort(port).addService(Service).build();
@@ -52,9 +54,9 @@ public class FrontEndMain {
         frontEnd.start();
 
         // Server threads are running in the background.
-        debug("FrontEnd started, listening on " + port);
+        debug(FrontEndMain.class.getSimpleName(), "FrontEnd started, listening on " + port);
 
-        // Do not exit the main thread. Wait until server is terminated.
+        // Do not exit the main thread. Wait until it is terminated.
         frontEnd.awaitTermination();
     }
 }
