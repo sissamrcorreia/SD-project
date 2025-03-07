@@ -20,6 +20,14 @@ public class FrontEndMain {
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println(FrontEndMain.class.getSimpleName());
 
+        for (String arg : args) {
+            if (arg.equals("-debug")) {
+                DEBUG_FLAG = true;
+                debug(FrontEndMain.class.getSimpleName(), "Debug mode enabled");
+                break;
+            }
+          }
+
         if (DEBUG_FLAG) {
             args = java.util.Arrays.stream(args)
                 .filter(arg -> !arg.equals("-debug"))
