@@ -12,7 +12,7 @@ class ClientMain:
 
     @staticmethod
     def main(args: List[str]):
-        print("ClientMain") # TODO: Check
+        print("ClientMain") 
 
         # receive and print arguments
         for i, arg in enumerate(args):
