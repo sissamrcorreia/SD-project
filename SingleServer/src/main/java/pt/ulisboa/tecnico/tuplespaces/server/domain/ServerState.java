@@ -20,8 +20,6 @@ public class ServerState {
   }
 
   private String getMatchingTuple(String pattern) {
-    ServerMain.debug(ServerState.class.getSimpleName(), "Searching for tuple matching pattern: " + pattern);
-
     for (String tuple : this.tuples) {
       if (tuple.matches(pattern)) {
         ServerMain.debug(ServerState.class.getSimpleName(), "Found tuple matching pattern: " + pattern + " -> " + tuple);
@@ -29,7 +27,6 @@ public class ServerState {
       }
     }
 
-    ServerMain.debug(ServerState.class.getSimpleName(), "No tuple found matching pattern: " + pattern);
     return null;
   }
 
