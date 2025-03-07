@@ -93,13 +93,12 @@ public class CommandProcessor {
 
         // read the tuple
         String result = this.clientService.read(tuple);
-        ClientMain.debug(CommandProcessor.class.getSimpleName(), "read: " + result);
 
         // print the result if
         if (result != null) {
             System.out.println(result);
         } else {
-            System.out.println("Tuple not found");
+            // Server is down
             return;
         }
         System.out.println();
@@ -119,12 +118,11 @@ public class CommandProcessor {
 
         // take the tuple
         String response = this.clientService.take(tuple);
-        ClientMain.debug(CommandProcessor.class.getSimpleName(), "take: " + response);
 
         if (response != null) {
             System.out.println(response);
         } else {
-            System.out.println("Tuple not found");
+            // Server is down
             return;
         }
         System.out.println();

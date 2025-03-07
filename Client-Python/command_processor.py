@@ -38,8 +38,7 @@ class CommandProcessor:
                 except EOFError:
                     break
         except KeyboardInterrupt:
-            pass
-
+            self.client_service.shutdown()
 
     def put(self, split):
         # check if input is valid
@@ -56,7 +55,6 @@ class CommandProcessor:
         self.client_service.put(tuple_value)
 
         print()
-        Debugger.debug("put: OK")
 
 
     def read(self, split):
@@ -72,14 +70,12 @@ class CommandProcessor:
 
         # read the tuple
         result = self.client_service.read(tuple_value)
-        Debugger.debug("read: " + result)
 
         # print the result if
         if result is not None:
-
             print(result)
         else:
-            print("Tuple not found")
+            # Server is down
             return
         print()
 
@@ -96,16 +92,13 @@ class CommandProcessor:
 
         # take the tuple
         response = self.client_service.take(tuple_value)
-        Debugger.debug("take: " + response)
 
         if response is not None:
             print(response)
         else:
-            print("Tuple not found")
+            # Server is down
             return
         print()
-        Debugger.debug("take: " + tuple_value)
-
 
     def get_tuple_spaces_state(self):
         Debugger.debug("getTupleSpacesState")

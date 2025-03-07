@@ -49,7 +49,7 @@ class ClientService:
             return response.result
 
         except grpc.RpcError as e:
-            print("Server is down. Please try again later.")
+            print("Server is down. Please try again later.\n")
 
     # Takes a tuple, removing it from the tuple space
     def take(self, pattern: str) -> str:
@@ -67,7 +67,7 @@ class ClientService:
             return response.result
 
         except grpc.RpcError as e:
-            print("Server is down. Please try again later.")
+            print("Server is down. Please try again later.\n")
 
     # Gets the full tuple space state
     def get_tuple_spaces_state(self):

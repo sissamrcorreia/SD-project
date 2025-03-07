@@ -63,6 +63,7 @@ public class ClientService {
 
     } catch (StatusRuntimeException e) {
       System.out.println("Server is down. Please try again later.");
+      System.out.println();
       return null;
     }
   }
@@ -81,6 +82,7 @@ public class ClientService {
 
     } catch (StatusRuntimeException e) {
       System.out.println("Server is down. Please try again later.");
+      System.out.println();
       return null;
     }
   }

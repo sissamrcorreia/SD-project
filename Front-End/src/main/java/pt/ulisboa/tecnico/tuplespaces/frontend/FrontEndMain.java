@@ -15,7 +15,7 @@ public class FrontEndMain {
     public static void debug(String className, String debugMessage) {
         if (DEBUG_FLAG)
             System.err.println("[DEBUG] " + className + ": " + debugMessage);
-    }  
+    }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println(FrontEndMain.class.getSimpleName());
@@ -32,14 +32,14 @@ public class FrontEndMain {
             args = java.util.Arrays.stream(args)
                 .filter(arg -> !arg.equals("-debug"))
                 .toArray(String[]::new);
-    
+
             // Receive and print arguments
             for (int i = 0; i < args.length; i++) {
               debug(FrontEndMain.class.getSimpleName(), String.format("arg[%d] = %s", i, args[i]));
             }
           }
           debug(FrontEndMain.class.getSimpleName(), String.format("Received %d arguments", args.length));
-    
+
         // check arguments
         if (args.length < 2) {
             System.err.println("Argument(s) missing!");

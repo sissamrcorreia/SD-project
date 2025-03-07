@@ -11,21 +11,22 @@ class ClientMain:
         print("ClientMain")
 
         Debugger.debug("Debug mode enabled")
+        filter_args = [arg for arg in args if arg != "-debug"]
 
         # receive and print arguments
-        for i, arg in enumerate(args):
+        for i, arg in enumerate(filter_args):
             Debugger.debug(f"arg[{i}] = {arg}")
-        Debugger.debug(f"Received {len(args)} arguments")
+        Debugger.debug(f"Received {len(filter_args)} arguments")
 
         # check arguments
-        if len(args) < 2:
+        if len(filter_args) < 2:
             print("Argument(s) missing!", file=sys.stderr)
             print("Usage: python3 client_main.py <host:port> <client_id>", file=sys.stderr)
             return
 
         # get the host and port of the server or front-end
-        host_port = args[0]
-        client_id = args[1]
+        host_port = filter_args[0]
+        client_id = filter_args[1]
         Debugger.debug(f"Client will connect to {host_port} with client_id {client_id}")
 
         parser = CommandProcessor(ClientService(host_port, client_id))

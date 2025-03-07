@@ -1,7 +1,10 @@
 package pt.ulisboa.tecnico.tuplespaces.frontend.grcp;
 
+import java.net.ConnectException;
+
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
