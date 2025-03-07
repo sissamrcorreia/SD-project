@@ -4,7 +4,7 @@ import com.google.protobuf.ProtocolStringList;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-
+import io.grpc.StatusRuntimeException;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.PutRequest;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.ReadRequest;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.ReadResponse;
@@ -37,41 +37,69 @@ public class ClientService {
 
   // Adds tuple t to the tuple space
   public void put(String tuple) {
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " putting tuple " + tuple);
-    PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
-    this.stub.put(request);
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " put tuple " + tuple);
+    try {
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " putting tuple " + tuple);
+      PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
+      this.stub.put(request);
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " put tuple " + tuple);
+      System.out.println("OK");
+
+    } catch (StatusRuntimeException e ) {
+      System.out.println("Server is down. Please try again later.");
+    }
   }
 
   // Accepts a tuple description and returns one tuple that matches the description, if it exists.
   // This operation blocks the client until a tuple that satisfies the description exists. The tuple is not removed from the tuple space.
   public String read(String pattern) {
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " reading tuple " + pattern);
-    ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
-    ReadResponse response = this.stub.read(request);
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " read tuple with pattern " + pattern + " and got " + response.getResult());
-    return response.getResult();
+    try {
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " reading tuple " + pattern);
+      ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
+      ReadResponse response = this.stub.read(request);
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " read tuple with pattern " + pattern + " and got " + response.getResult());
+
+      System.out.println("OK");
+      return response.getResult();
+
+    } catch (StatusRuntimeException e ) {
+      System.out.println("Server is down. Please try again later.");
+      return null;
+    }
   }
 
   // Accepts a tuple description and returns one tuple that matches the description.
   // This operation blocks the client until a tuple that satisfies the description exists. The tuple is removed from the tuple space.
   public String take(String pattern) {
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " taking tuple " + pattern);
-    TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
-    TakeResponse response = this.stub.take(request);
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " take tuple with pattern " + pattern + " and got " + response.getResult());
-    return response.getResult();
+    try{
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " taking tuple " + pattern);
+      TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
+      TakeResponse response = this.stub.take(request);
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " take tuple with pattern " + pattern + " and got " + response.getResult());
+
+      System.out.println("OK");
+      return response.getResult();
+
+    } catch (StatusRuntimeException e ) {
+      System.out.println("Server is down. Please try again later.");
+      return null;
+    }
   }
 
   // Does not take arguments and returns a list of all tuples on each server.
   public void getTupleSpacesState() {
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " getting tuple spaces state");
-    getTupleSpacesStateRequest request = getTupleSpacesStateRequest.newBuilder().build();
-    getTupleSpacesStateResponse response = this.stub.getTupleSpacesState(request);
-    ProtocolStringList TupleList = response.getTupleList();
+    try {
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " getting tuple spaces state");
+      getTupleSpacesStateRequest request = getTupleSpacesStateRequest.newBuilder().build();
+      getTupleSpacesStateResponse response = this.stub.getTupleSpacesState(request);
+      ProtocolStringList TupleList = response.getTupleList();
 
-    System.out.println(TupleList);
-    ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " got tuple spaces state");
+      System.out.println("OK");
+      System.out.println(TupleList);
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " got tuple spaces state");
+
+    } catch (StatusRuntimeException e ) {
+      System.out.println("Server is down. Please try again later.");
+    }
   }
 
   // A Channel should be shutdown before stopping the process.

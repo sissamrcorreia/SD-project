@@ -77,7 +77,6 @@ public class CommandProcessor {
 
         // put the tuple
         this.clientService.put(tuple);
-        System.out.println("OK");
         System.out.println();
     }
 
@@ -98,7 +97,6 @@ public class CommandProcessor {
 
         // print the result if
         if (result != null) {
-            System.out.println("OK");
             System.out.println(result);
         } else {
             System.out.println("Tuple not found");
@@ -124,7 +122,6 @@ public class CommandProcessor {
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "take: " + response);
 
         if (response != null) {
-            System.out.println("OK");
             System.out.println(response);
         } else {
             System.out.println("Tuple not found");
@@ -135,7 +132,6 @@ public class CommandProcessor {
 
     private void getTupleSpacesState() {
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "getTupleSpacesState");
-        System.out.println("OK");
 
         // get the tuple spaces state
         this.clientService.getTupleSpacesState();
