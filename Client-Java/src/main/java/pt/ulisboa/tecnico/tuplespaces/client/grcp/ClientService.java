@@ -45,6 +45,7 @@ public class ClientService {
       System.out.println("OK");
 
     } catch (StatusRuntimeException e) {
+      //System.err.println("Erro: " + e);
       System.out.println("Server is down. Please try again later.");
     }
   }
