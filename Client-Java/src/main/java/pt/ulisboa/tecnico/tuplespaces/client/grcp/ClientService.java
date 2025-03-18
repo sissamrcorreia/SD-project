@@ -16,6 +16,9 @@ import pt.ulisboa.tecnico.tuplespaces.client.ClientMain;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc.TupleSpacesBlockingStub;
 
+import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;
+
 public class ClientService {
   private ManagedChannel channel;
   private final TupleSpacesBlockingStub stub;
@@ -35,24 +38,39 @@ public class ClientService {
     this.client_id = client_id;
   }
 
+  private TupleSpacesBlockingStub addMetadataToStub(String[] split) {
+    Metadata metadata = new Metadata();
+    metadata.put(Metadata.Key.of("delay1", Metadata.ASCII_STRING_MARSHALLER), String.valueOf(split[2]));
+    metadata.put(Metadata.Key.of("delay2", Metadata.ASCII_STRING_MARSHALLER), String.valueOf(split[3]));
+    metadata.put(Metadata.Key.of("delay3", Metadata.ASCII_STRING_MARSHALLER), String.valueOf(split[4]));
+    return MetadataUtils.attachHeaders(stub, metadata);
+  }
+
   // Adds tuple t to the tuple space
-  public void put(String tuple) {
+  public void put(String[] split) {
     try {
+      String tuple = split[1];
+      TupleSpacesBlockingStub _stub = this.stub;
+      if (split.length == 5) {
+        _stub = addMetadataToStub(split);
+      }
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " putting tuple " + tuple);
       PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
-      this.stub.put(request);
+      _stub.put(request);
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " put tuple " + tuple);
       System.out.println("OK");
 
     } catch (StatusRuntimeException e) {
+      System.out.println("Erro: " + e.getMessage()); // FIXME
       System.out.println("Server is down. Please try again later.");
     }
   }
 
   // Accepts a tuple description and returns one tuple that matches the description, if it exists.
   // This operation blocks the client until a tuple that satisfies the description exists. The tuple is not removed from the tuple space.
-  public String read(String pattern) {
+  public String read(String[] split) {
     try {
+      String pattern = split[1];
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " reading tuple " + pattern);
       ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
       ReadResponse response = this.stub.read(request);
@@ -70,8 +88,9 @@ public class ClientService {
 
   // Accepts a tuple description and returns one tuple that matches the description.
   // This operation blocks the client until a tuple that satisfies the description exists. The tuple is removed from the tuple space.
-  public String take(String pattern) {
+  public String take(String[] split) {
     try {
+      String pattern = split[1];
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " taking tuple " + pattern);
       TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
       TakeResponse response = this.stub.take(request);

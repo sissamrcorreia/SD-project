@@ -29,7 +29,7 @@ public class CommandProcessor {
             System.out.print("> ");
             String line = scanner.nextLine().trim();
             String[] split = line.split(SPACE);
-             switch (split[0]) {
+            switch (split[0]) {
                 case PUT:
                     this.put(split);
                     break;
@@ -76,7 +76,7 @@ public class CommandProcessor {
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "put: " + tuple);
 
         // put the tuple
-        this.clientService.put(tuple);
+        this.clientService.put(split);
         System.out.println();
     }
 
@@ -92,7 +92,7 @@ public class CommandProcessor {
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "read: " + tuple);
 
         // read the tuple
-        String result = this.clientService.read(tuple);
+        String result = this.clientService.read(split);
 
         // print the result if
         if (result != null) {
@@ -117,7 +117,7 @@ public class CommandProcessor {
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "take: " + tuple);
 
         // take the tuple
-        String response = this.clientService.take(tuple);
+        String response = this.clientService.take(split);
 
         if (response != null) {
             System.out.println(response);
@@ -161,28 +161,36 @@ public class CommandProcessor {
     }
 
     private void printUsage() {
-        System.out.println("Usage:\n" +
-                "- put <element[,more_elements]>\n" +
-                "- read <element[,more_elements]>\n" +
-                "- take <element[,more_elements]>\n" +
+        System.out.println("Usage:\n" + // TODO: change the message
+                "- put <element[,more_elements]> [delay1] [delay2] [delay3]\n" +
+                "- read <element[,more_elements]> [delay1] [delay2] [delay3]\n" +
+                "- take <element[,more_elements]> [delay1] [delay2] [delay3]\n" +
                 "- getTupleSpacesState\n" +
                 "- sleep <integer>\n" +
                 "- exit\n");
     }
 
-    private boolean inputIsValid(String[] input){
+    private boolean inputIsValid(String[] input){ // TODO: Check this later for improvements
         if (input.length < 2
             ||
             !input[1].substring(0,1).equals(BGN_TUPLE)
             ||
             !input[1].endsWith(END_TUPLE)
-            ||
-            input.length > 2
             ) {
             return false;
         }
-        else {
-            return true;
+        else if (input.length > 2) {
+            if( input.length == 5) {
+                for (int i = 2; i < input.length; i++) {
+                    try {
+                        Integer.parseInt(input[i]);
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                }
+            }
+            else return false;
         }
+        return true;
     }
 }
