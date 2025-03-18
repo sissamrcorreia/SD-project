@@ -5,6 +5,7 @@ import java.io.IOException;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+
 public class ServerMain {
   // Set flag to true to print debug messages.
   // The flag can be set using the -debug command line option.
@@ -52,19 +53,33 @@ public class ServerMain {
       final DelayInterceptor interceptor = new DelayInterceptor();
       debug(ServerMain.class.getSimpleName(), "Server will listen on port " + port);
 
-      // Create a new server to listen on port
-      Server server = ServerBuilder.forPort(port)
-      .addService(impl)
-      .intercept(interceptor)
-      .build();
+      try {
+          // Create a new server to listen on port
+          Server server = ServerBuilder.forPort(port)
+              .addService(impl)
+              .intercept(interceptor)
+              .build();
 
-      // Start the server
-      server.start();
+          // Start the server
+          server.start();
 
-      // Server threads are running in the background.
-      debug(ServerMain.class.getSimpleName(), "Server started, listening on " + port);
+          // Server threads are running in the background.
+          debug(ServerMain.class.getSimpleName(), "Server started, listening on " + port);
 
-      // Do not exit the main thread. Wait until server is terminated.
-      server.awaitTermination();
-	}
+          // Do not exit the main thread. Wait until server is terminated.
+          server.awaitTermination();
+          
+      } catch (IOException e) {
+          System.err.println("Error: Port " + port + " is already in use.");
+          System.err.println("Please choose a different port and try again.");
+          System.exit(1);
+      } catch (InterruptedException e) {
+          System.err.println("Server was interrupted.");
+          Thread.currentThread().interrupt();
+          System.exit(1);
+      } catch (Exception e) {
+          System.err.println("An unexpected error occurred:");
+          e.printStackTrace();
+      }
+  }
 }
