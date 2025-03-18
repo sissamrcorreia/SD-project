@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.tuplespaces.frontend.util;
 import io.grpc.stub.StreamObserver;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.PutResponse;
 // import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.PutResponse;
+import pt.ulisboa.tecnico.tuplespaces.frontend.FrontEndMain;
 
 public class PutObserver implements StreamObserver<PutResponse> {
     FrontEndResponseCollector collector;
@@ -14,16 +15,16 @@ public class PutObserver implements StreamObserver<PutResponse> {
     @Override
     public void onNext(PutResponse value) {
         collector.addString("OK");
-        System.out.println("Received: " + value);
+        FrontEndMain.debug(PutObserver.class.getSimpleName(), "Received put response: " + value);
     }
 
     @Override
     public void onError(Throwable t) {
-        System.err.println("Error: " + t.getMessage());
+        FrontEndMain.debug(PutObserver.class.getSimpleName(), "Error: " + t.getMessage());
     }
 
     @Override
     public void onCompleted() {
-        System.out.println("Put operation completed.");
+        FrontEndMain.debug(PutObserver.class.getSimpleName(), "Completed");
     }
 }

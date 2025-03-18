@@ -2,6 +2,7 @@ package pt.ulisboa.tecnico.tuplespaces.frontend.util;
 
 import io.grpc.stub.StreamObserver;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.getTupleSpacesStateResponse;
+import pt.ulisboa.tecnico.tuplespaces.frontend.FrontEndMain;
 
 import java.util.ArrayList;
 //import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.getTupleSpacesStateResponse;
@@ -21,9 +22,11 @@ public class GetTupleSpacesStateObserver implements StreamObserver<getTupleSpace
 
     @Override
     public void onError(Throwable t) {
-        System.err.println("Error: " + t.getMessage());
+        FrontEndMain.debug(GetTupleSpacesStateObserver.class.getSimpleName(), "Error: " + t.getMessage());
     }
 
     @Override
-    public void onCompleted() {}
+    public void onCompleted() {
+        FrontEndMain.debug(GetTupleSpacesStateObserver.class.getSimpleName(), "Completed");
+    }
 }

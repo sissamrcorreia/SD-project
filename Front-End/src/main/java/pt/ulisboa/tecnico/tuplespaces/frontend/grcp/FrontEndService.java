@@ -9,7 +9,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc.TupleSpacesBlockingStub;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.PutRequest;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.PutResponse;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.ReadRequest;
@@ -44,15 +43,23 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
     // Override the gRPC methods with proper signatures
     @Override
     public void put(PutRequest request, StreamObserver<PutResponse> responseObserver) {
+        int numSv = numServers;
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received put request: " + request);
         
         // Forward the request to the backend server
         FrontEndResponseCollector collector = new FrontEndResponseCollector();
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded put request");
-        this.stub[0].put(request, new PutObserver(collector));
-
-        collector.waitUntilAllReceived(1); // TODO: Change this for every server
+        PutObserver observer = new PutObserver(collector);
+        
+        for (int i = 0; i < numServers; i++) {
+            this.stub[i].put(request, observer);
+        }
+        
         PutResponse response = PutResponse.newBuilder().build();
+        
+        // Wait all servers response
+        collector.waitUntilAllReceived(numSv);
+        // TODO: Check if all servers are alive, if not decrease numSv
         
         // Send the response back to the client
         responseObserver.onNext(response);
@@ -67,9 +74,15 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
         
         // Forward the request to the backend server
         FrontEndResponseCollector collector = new FrontEndResponseCollector();
-        this.stub[0].read(request, new ReadObserver(collector));
+
+        for (int i = 0; i < numServers; i++) {
+            this.stub[i].read(request, new ReadObserver(collector));
+        }
         
-        collector.waitUntilAllReceived(1); // wait for only one server response
+        // Wait for only one server response
+        collector.waitUntilAllReceived(1);
+        // TODO: If none is alive, return an empty response ?
+        
         ReadResponse response = ReadResponse.newBuilder().setResult(collector.getString(0)).build();
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded read request with response: " + response);
 
@@ -79,7 +92,7 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sent read response");
     }
 
-    // @Override
+    // @Override // Etapa B.2
     // public void take(TakeRequest request, StreamObserver<TakeResponse> responseObserver) {
     //     FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received take request: " + request);
     //     // Forward the request to the backend server
@@ -99,9 +112,13 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
         FrontEndResponseCollector collector = new FrontEndResponseCollector();
         
         // Forward the request to the backend server
-        this.stub[0].getTupleSpacesState(request, new GetTupleSpacesStateObserver(collector));
-        collector.waitUntilAllReceived(1); // TODO: Change this for every server
-        
+
+        for (int i = 0; i < numServers; i++) {
+            this.stub[i].getTupleSpacesState(request, new GetTupleSpacesStateObserver(collector));
+        }
+        collector.waitUntilAllReceived(numServers);
+        // TODO: Check if all servers are alive, if not decrease numSv
+
         getTupleSpacesStateResponse response = getTupleSpacesStateResponse.newBuilder()
         .addAllTuple(collector.getStringList())
         .build();

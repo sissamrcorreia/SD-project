@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.tuplespaces.frontend.util;
 
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.ReadResponse;
+import pt.ulisboa.tecnico.tuplespaces.frontend.FrontEndMain;
 import io.grpc.stub.StreamObserver;
 // import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.ReadResponse;
 
@@ -18,9 +19,11 @@ public class ReadObserver implements StreamObserver<ReadResponse> {
 
     @Override
     public void onError(Throwable t) {
-        System.err.println("Error: " + t.getMessage());
+        FrontEndMain.debug(ReadObserver.class.getSimpleName(), "Error: " + t.getMessage());
     }
 
     @Override
-    public void onCompleted() {}
+    public void onCompleted() {
+        FrontEndMain.debug(ReadObserver.class.getSimpleName(), "Completed");
+    }
 }
