@@ -165,7 +165,7 @@ public class CommandProcessor {
                 "- put <element[,more_elements]>\n" +
                 "- read <element[,more_elements]>\n" +
                 "- take <element[,more_elements]>\n" +
-                "- getTupleSpacesState\n" +
+                "- getTupleSpacesState <server>\n" +
                 "- sleep <integer>\n" +
                 "- exit\n");
     }

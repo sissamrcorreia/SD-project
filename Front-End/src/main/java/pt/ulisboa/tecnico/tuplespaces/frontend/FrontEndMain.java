@@ -1,16 +1,12 @@
 package pt.ulisboa.tecnico.tuplespaces.frontend;
 
 import java.io.IOException;
-//import java.util.Arrays;
-
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
 import pt.ulisboa.tecnico.tuplespaces.frontend.grcp.FrontEndService;
 
 public class FrontEndMain {
-    static final int numServers = 3;
-
     // Set flag to true to print debug messages.
     // The flag can be set using the -debug command line option.
     private static boolean DEBUG_FLAG = (System.getProperty("debug") != null);
@@ -45,26 +41,19 @@ public class FrontEndMain {
           debug(FrontEndMain.class.getSimpleName(), String.format("Received %d arguments", args.length));
 
         // check arguments
-        if (args.length < 4) {
+        if (args.length < 2) {
             System.err.println("Argument(s) missing!");
-            System.err.println("Usage: mvn exec:java -Dexec.args=<host:port> <client_port>"); // FIXME: mensagem errada
+            System.err.println("Usage: mvn exec:java -Dexec.args=<host:port> <client_port>");
             return;
         }
 
+        // get the ports
         final int port = Integer.parseInt(args[0]);
-        String tupleSpacesHost_port1 = args[1];
-        String tupleSpacesHost_port2 = args[2];
-        String tupleSpacesHost_port3 = args[3];
+        String tupleSpacesHost_port = args[1];
 
-        String [] targets = new String[]{tupleSpacesHost_port1, tupleSpacesHost_port2, tupleSpacesHost_port3};
+        FrontEndService Service = new FrontEndService(tupleSpacesHost_port);
 
-        FrontEndService Service = new FrontEndService(targets, port);
-        //System.out.println("target: " + Arrays.toString(targets));
-        //System.out.println("port: " + port);
-
-        for (String tupleSpace : targets) {
-            debug(FrontEndMain.class.getSimpleName(), "FrontEnd will connect to TupleSpace with server: " + tupleSpace);
-        }
+        debug(FrontEndMain.class.getSimpleName(), "FrontEnd will connect to TupleSpaces on " + tupleSpacesHost_port);
 
         // Create a new server to listen on port
         Server frontEnd = ServerBuilder.forPort(port).addService(Service).build();

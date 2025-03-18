@@ -21,9 +21,7 @@
 
 		<mainclass>pt.ulisboa.tecnico.tuplespaces.frontend.FrontEndMain</mainclass>
 		<frontend.port>2001</frontend.port>
-		<server1.hostport>localhost:3001</server1.hostport>
-		<server2.hostport>localhost:3002</server2.hostport>
-		<server3.hostport>localhost:3003</server3.hostport>
+		<server.hostport>localhost:3001</server.hostport>
 
 	</properties>
 
@@ -71,9 +69,7 @@
 					<mainClass>${mainclass}</mainClass>
 					<arguments>
 						<argument>${frontend.port}</argument>
-						<argument>${server1.hostport}</argument>
-						<argument>${server2.hostport}</argument>
-						<argument>${server3.hostport}</argument>
+						<argument>${server.hostport}</argument>
 					</arguments>
 				</configuration>
 			</plugin>
