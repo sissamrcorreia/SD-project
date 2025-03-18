@@ -24,6 +24,10 @@ public class ClientService {
   private final TupleSpacesBlockingStub stub;
   private final int client_id;
 
+  static final Metadata.Key<String> DELAY_1 = Metadata.Key.of("delay1", Metadata.ASCII_STRING_MARSHALLER);
+  static final Metadata.Key<String> DELAY_2 = Metadata.Key.of("delay2", Metadata.ASCII_STRING_MARSHALLER);
+  static final Metadata.Key<String> DELAY_3 = Metadata.Key.of("delay3", Metadata.ASCII_STRING_MARSHALLER);
+
   public ClientService(String host_port, int client_id) {
     // Channel is the abstraction to connect to a service endpoint.
 		// Let us use plaintext communication because we do not have certificates.
@@ -40,10 +44,11 @@ public class ClientService {
 
   private TupleSpacesBlockingStub addMetadataToStub(String[] split) {
     Metadata metadata = new Metadata();
-    metadata.put(Metadata.Key.of("delay1", Metadata.ASCII_STRING_MARSHALLER), String.valueOf(split[2]));
-    metadata.put(Metadata.Key.of("delay2", Metadata.ASCII_STRING_MARSHALLER), String.valueOf(split[3]));
-    metadata.put(Metadata.Key.of("delay3", Metadata.ASCII_STRING_MARSHALLER), String.valueOf(split[4]));
-    return MetadataUtils.attachHeaders(stub, metadata);
+    metadata.put(DELAY_1, split[2]);
+    metadata.put(DELAY_2, split[3]);
+    metadata.put(DELAY_3, split[4]);
+
+    return this.stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor((metadata))); // TODO: check if this is the correct way to add metadata to the stub
   }
 
   // Adds tuple t to the tuple space
@@ -52,6 +57,7 @@ public class ClientService {
       String tuple = split[1];
       TupleSpacesBlockingStub _stub = this.stub;
       if (split.length == 5) {
+        ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " adding metadata to stub");
         _stub = addMetadataToStub(split);
       }
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " putting tuple " + tuple);
@@ -61,7 +67,6 @@ public class ClientService {
       System.out.println("OK");
 
     } catch (StatusRuntimeException e) {
-      System.out.println("Erro: " + e.getMessage()); // FIXME
       System.out.println("Server is down. Please try again later.");
     }
   }
@@ -71,9 +76,14 @@ public class ClientService {
   public String read(String[] split) {
     try {
       String pattern = split[1];
+      TupleSpacesBlockingStub _stub = this.stub;
+      if (split.length == 5) {
+        ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " adding metadata to stub");
+        _stub = addMetadataToStub(split);
+      }
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " reading tuple " + pattern);
       ReadRequest request = ReadRequest.newBuilder().setSearchPattern(pattern).build();
-      ReadResponse response = this.stub.read(request);
+      ReadResponse response = _stub.read(request);
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " read tuple with pattern " + pattern + " and got " + response.getResult());
 
       System.out.println("OK");
@@ -88,23 +98,24 @@ public class ClientService {
 
   // Accepts a tuple description and returns one tuple that matches the description.
   // This operation blocks the client until a tuple that satisfies the description exists. The tuple is removed from the tuple space.
-  public String take(String[] split) {
-    try {
-      String pattern = split[1];
-      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " taking tuple " + pattern);
-      TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
-      TakeResponse response = this.stub.take(request);
-      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " take tuple with pattern " + pattern + " and got " + response.getResult());
+  // TODO: B.2
+  // public String take(String[] split) {
+  //   try {
+  //     String pattern = split[1];
+  //     ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " taking tuple " + pattern);
+  //     TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
+  //     TakeResponse response = this.stub.take(request);
+  //     ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " take tuple with pattern " + pattern + " and got " + response.getResult());
 
-      System.out.println("OK");
-      return response.getResult();
+  //     System.out.println("OK");
+  //     return response.getResult();
 
-    } catch (StatusRuntimeException e) {
-      System.out.println("Server is down. Please try again later.");
-      System.out.println();
-      return null;
-    }
-  }
+  //   } catch (StatusRuntimeException e) {
+  //     System.out.println("Server is down. Please try again later.");
+  //     System.out.println();
+  //     return null;
+  //   }
+  // }
 
   // Does not take arguments and returns a list of all tuples on each server.
   public void getTupleSpacesState() {

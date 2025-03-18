@@ -49,10 +49,14 @@ public class ServerMain {
 
       final int port = Integer.parseInt(args[0]);
       final BindableService impl = new ServiceImpl();
+      final DelayInterceptor interceptor = new DelayInterceptor();
       debug(ServerMain.class.getSimpleName(), "Server will listen on port " + port);
 
       // Create a new server to listen on port
-      Server server = ServerBuilder.forPort(port).addService(impl).build();
+      Server server = ServerBuilder.forPort(port)
+      .addService(impl)
+      .intercept(interceptor)
+      .build();
 
       // Start the server
       server.start();
