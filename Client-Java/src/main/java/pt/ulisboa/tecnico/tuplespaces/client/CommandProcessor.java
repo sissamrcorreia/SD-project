@@ -39,7 +39,7 @@ public class CommandProcessor {
                     break;
 
                 case TAKE:
-                    this.take(split);
+                    // this.take(split);
                     break;
 
                 case GET_TUPLE_SPACES_STATE:
@@ -105,28 +105,28 @@ public class CommandProcessor {
     }
 
 
-    private void take(String[] split) {
-         // check if input is valid
-        if (!this.inputIsValid(split)) {
-            this.printUsage();
-            return;
-        }
+    // private void take(String[] split) {
+    //      // check if input is valid
+    //     if (!this.inputIsValid(split)) {
+    //         this.printUsage();
+    //         return;
+    //     }
 
-        // get the tuple
-        String tuple = split[1];
-        ClientMain.debug(CommandProcessor.class.getSimpleName(), "take: " + tuple);
+    //     // get the tuple
+    //     String tuple = split[1];
+    //     ClientMain.debug(CommandProcessor.class.getSimpleName(), "take: " + tuple);
 
-        // take the tuple
-        String response = this.clientService.take(split);
+    //     // take the tuple
+    //     String response = this.clientService.take(split);
 
-        if (response != null) {
-            System.out.println(response);
-        } else {
-            // Server is down
-            return;
-        }
-        System.out.println();
-    }
+    //     if (response != null) {
+    //         System.out.println(response);
+    //     } else {
+    //         // Server is down
+    //         return;
+    //     }
+    //     System.out.println();
+    // }
 
     private void getTupleSpacesState() {
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "getTupleSpacesState");
