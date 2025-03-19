@@ -68,6 +68,7 @@ public class ClientService {
 
     } catch (StatusRuntimeException e) {
       System.out.println("Server is down. Please try again later.");
+      System.out.println(e.toString()); // TODO: DELETE
     }
   }
 

@@ -1,18 +1,19 @@
 package pt.ulisboa.tecnico.tuplespaces.server;
 
 import io.grpc.stub.StreamObserver;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.PutRequest;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.PutResponse;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.ReadRequest;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.ReadResponse;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.TakeRequest;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.TakeResponse;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.getTupleSpacesStateRequest;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.getTupleSpacesStateResponse;
+
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaGrpc;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.PutRequest;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.PutResponse;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.ReadRequest;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.ReadResponse;
+
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.getTupleSpacesStateRequest;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.getTupleSpacesStateResponse;
+
 import pt.ulisboa.tecnico.tuplespaces.server.domain.ServerState;
 
-public class ServiceImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
+public class ServiceImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaImplBase {
     private ServerState state = new ServerState();
 
     @Override
@@ -38,17 +39,17 @@ public class ServiceImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "Read request completed");
     }
 
-    @Override
-    public void take(TakeRequest request, StreamObserver<TakeResponse> responseObserver) {
-        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Received take request: " + request.getSearchPattern());
-        String tuple = state.take(request.getSearchPattern());
-        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending take response: " + tuple);
-        TakeResponse response = TakeResponse.newBuilder().setResult(tuple).build();
-        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending take response: " + response);
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Take request completed");
-    }
+    // @Override
+    // public void take(TakeRequest request, StreamObserver<TakeResponse> responseObserver) {
+    //     ServerMain.debug(ServiceImpl.class.getSimpleName(), "Received take request: " + request.getSearchPattern());
+    //     String tuple = state.take(request.getSearchPattern());
+    //     ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending take response: " + tuple);
+    //     TakeResponse response = TakeResponse.newBuilder().setResult(tuple).build();
+    //     ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending take response: " + response);
+    //     responseObserver.onNext(response);
+    //     responseObserver.onCompleted();
+    //     ServerMain.debug(ServiceImpl.class.getSimpleName(), "Take request completed");
+    // }
 
     @Override
     public void getTupleSpacesState(getTupleSpacesStateRequest request, StreamObserver<getTupleSpacesStateResponse> responseObserver) {

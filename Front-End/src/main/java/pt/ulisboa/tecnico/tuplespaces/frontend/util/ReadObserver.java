@@ -1,9 +1,8 @@
 package pt.ulisboa.tecnico.tuplespaces.frontend.util;
 
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.ReadResponse;
 import pt.ulisboa.tecnico.tuplespaces.frontend.FrontEndMain;
 import io.grpc.stub.StreamObserver;
-// import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.ReadResponse;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.ReadResponse;
 
 public class ReadObserver implements StreamObserver<ReadResponse> {
     FrontEndResponseCollector collector;

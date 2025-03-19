@@ -1,22 +1,25 @@
 package pt.ulisboa.tecnico.tuplespaces.frontend.grcp;
 
-import java.net.ConnectException;
-import java.util.ArrayList;
-
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaGrpc;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass;
+
+import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass;
+
+// .PutRequest; //
+// import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.PutResponse;
+
+// import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.ReadRequest;
+// import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.ReadResponse;
+
+// import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.getTupleSpacesStateRequest;
+// import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.getTupleSpacesStateResponse;
+
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.PutRequest;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.PutResponse;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.ReadRequest;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.ReadResponse;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.TakeRequest;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.TakeResponse;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.getTupleSpacesStateRequest;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.getTupleSpacesStateResponse;
+
 import pt.ulisboa.tecnico.tuplespaces.frontend.FrontEndMain;
 import pt.ulisboa.tecnico.tuplespaces.frontend.util.FrontEndResponseCollector;
 import pt.ulisboa.tecnico.tuplespaces.frontend.util.GetTupleSpacesStateObserver;
@@ -25,24 +28,25 @@ import pt.ulisboa.tecnico.tuplespaces.frontend.util.ReadObserver;
 
 public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
     private final ManagedChannel[] channels;
-    private final TupleSpacesGrpc.TupleSpacesStub[] stub;
+    private final TupleSpacesReplicaGrpc.TupleSpacesReplicaStub[] stub;
+
     static final int numServers = 3;
 
     public FrontEndService(String[] targets) {
         channels = new ManagedChannel[numServers];
-        stub = new TupleSpacesGrpc.TupleSpacesStub[numServers];
+        stub = new TupleSpacesReplicaGrpc.TupleSpacesReplicaStub[numServers];
 
         for (int i = 0; i < numServers; i++) {
             FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Creating channel for target: " + targets[i]);
             channels[i] = ManagedChannelBuilder.forTarget(targets[i]).usePlaintext().build();
             FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Creating stub for target: " + targets[i]);
-            stub[i] = TupleSpacesGrpc.newStub(channels[i]);
+            stub[i] = TupleSpacesReplicaGrpc.newStub(channels[i]);
         }
     }
 
     // Override the gRPC methods with proper signatures
     @Override
-    public void put(PutRequest request, StreamObserver<PutResponse> responseObserver) {
+    public void put(TupleSpacesOuterClass.PutRequest request, StreamObserver<TupleSpacesOuterClass.PutResponse> responseObserver) {
         int numSv = numServers;
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received put request: " + request);
         
@@ -50,47 +54,53 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
         FrontEndResponseCollector collector = new FrontEndResponseCollector();
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded put request");
         PutObserver observer = new PutObserver(collector);
-        
+
+        TupleSpacesReplicaOuterClass.PutRequest replicaRequest = TupleSpacesReplicaOuterClass.PutRequest.newBuilder()
+            .setNewTuple(request.getNewTuple())
+            .build();
+
         for (int i = 0; i < numServers; i++) {
-            this.stub[i].put(request, observer);
+            this.stub[i].put(replicaRequest, observer);
         }
-        
-        PutResponse response = PutResponse.newBuilder().build();
         
         // Wait all servers response
         collector.waitUntilAllReceived(numSv);
-        // TODO: Check if all servers are alive, if not decrease numSv
+        // TODO: msg no discord
         
-        // Send the response back to the client
+        TupleSpacesOuterClass.PutResponse response = TupleSpacesOuterClass.PutResponse.newBuilder().build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
-        
+        // Send the response back to the client
+        // TupleSpacesReplicaOuterClass.PutResponse response_replica = TupleSpacesReplicaOuterClass.PutResponse.newBuilder().build();
+        // observer.onNext(response_replica);
+        // observer.onCompleted();
+
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sent put response");
     }
 
-    @Override
-    public void read(ReadRequest request, StreamObserver<ReadResponse> responseObserver) {
-        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received read request: " + request);
+    // @Override
+    // public void read(ReadRequest request, StreamObserver<ReadResponse> responseObserver) {
+    //     FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received read request: " + request);
         
-        // Forward the request to the backend server
-        FrontEndResponseCollector collector = new FrontEndResponseCollector();
+    //     // Forward the request to the backend server
+    //     FrontEndResponseCollector collector = new FrontEndResponseCollector();
 
-        for (int i = 0; i < numServers; i++) {
-            this.stub[i].read(request, new ReadObserver(collector));
-        }
+    //     for (int i = 0; i < numServers; i++) {
+    //         this.stub[i].read(request, new ReadObserver(collector));
+    //     }
         
-        // Wait for only one server response
-        collector.waitUntilAllReceived(1);
-        // TODO: If none is alive, return an empty response ?
+    //     // Wait for only one server response
+    //     collector.waitUntilAllReceived(1);
+    //     // TODO: If none is alive, return an empty response ?
         
-        ReadResponse response = ReadResponse.newBuilder().setResult(collector.getString(0)).build();
-        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded read request with response: " + response);
+    //     ReadResponse response = ReadResponse.newBuilder().setResult(collector.getString(0)).build();
+    //     FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded read request with response: " + response);
 
-        // Send the response back to the client
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sent read response");
-    }
+    //     // Send the response back to the client
+    //     responseObserver.onNext(response);
+    //     responseObserver.onCompleted();
+    //     FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sent read response");
+    // }
 
     // @Override // Etapa B.2
     // public void take(TakeRequest request, StreamObserver<TakeResponse> responseObserver) {
@@ -104,22 +114,25 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
     //     FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sent take response");
     // }
 
-    @Override
-    public void getTupleSpacesState(getTupleSpacesStateRequest request,
-                                    StreamObserver<getTupleSpacesStateResponse> responseObserver) {
+    // @Override
+    public void getTupleSpacesState(TupleSpacesOuterClass.getTupleSpacesStateRequest request,
+                                    StreamObserver<TupleSpacesOuterClass.getTupleSpacesStateResponse> responseObserver) {
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received getTupleSpacesState request");
         
         FrontEndResponseCollector collector = new FrontEndResponseCollector();
+        GetTupleSpacesStateObserver observer = new GetTupleSpacesStateObserver(collector);
+
+        TupleSpacesReplicaOuterClass.getTupleSpacesStateRequest replicaRequest = TupleSpacesReplicaOuterClass.getTupleSpacesStateRequest.newBuilder().build();
         
         // Forward the request to the backend server
-
         for (int i = 0; i < numServers; i++) {
-            this.stub[i].getTupleSpacesState(request, new GetTupleSpacesStateObserver(collector));
+            this.stub[i].getTupleSpacesState(replicaRequest, observer);
         }
         collector.waitUntilAllReceived(numServers);
-        // TODO: Check if all servers are alive, if not decrease numSv
 
-        getTupleSpacesStateResponse response = getTupleSpacesStateResponse.newBuilder()
+        // TODO: msg no discord
+
+        TupleSpacesOuterClass.getTupleSpacesStateResponse response = TupleSpacesOuterClass.getTupleSpacesStateResponse.newBuilder()
         .addAllTuple(collector.getStringList())
         .build();
 
@@ -133,6 +146,8 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
     // A Channel should be shutdown before stopping the process.
     public void shutdown() {
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Shutting down the channel");
-        this.channels[0].shutdownNow();
+        for (int i = 0; i < numServers; i++) {
+            this.channels[i].shutdownNow();
+        }
     }
 }

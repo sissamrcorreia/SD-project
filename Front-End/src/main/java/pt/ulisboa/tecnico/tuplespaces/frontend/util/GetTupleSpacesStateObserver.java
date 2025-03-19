@@ -1,12 +1,10 @@
 package pt.ulisboa.tecnico.tuplespaces.frontend.util;
 
 import io.grpc.stub.StreamObserver;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.getTupleSpacesStateResponse;
 import pt.ulisboa.tecnico.tuplespaces.frontend.FrontEndMain;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.getTupleSpacesStateResponse;
 
 import java.util.ArrayList;
-//import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaXuLiskov.getTupleSpacesStateResponse;
-
 public class GetTupleSpacesStateObserver implements StreamObserver<getTupleSpacesStateResponse> {
     FrontEndResponseCollector collector;
 

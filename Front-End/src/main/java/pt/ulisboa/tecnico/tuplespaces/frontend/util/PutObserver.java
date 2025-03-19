@@ -1,9 +1,10 @@
 package pt.ulisboa.tecnico.tuplespaces.frontend.util;
 
 import io.grpc.stub.StreamObserver;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.PutResponse;
-// import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.PutResponse;
 import pt.ulisboa.tecnico.tuplespaces.frontend.FrontEndMain;
+import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.PutResponse;
+
+// import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.PutResponse;
 
 public class PutObserver implements StreamObserver<PutResponse> {
     FrontEndResponseCollector collector;
