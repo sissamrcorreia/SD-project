@@ -72,7 +72,7 @@ public class FrontEndMain {
 
         try {
             // Create a new server to listen on port
-            Server frontEnd = ServerBuilder.forPort(port).addService(Service).build();
+            Server frontEnd = ServerBuilder.forPort(port).addService(Service).intercept(new DelayInterceptor()).build();
 
             // Start the server
             frontEnd.start();
