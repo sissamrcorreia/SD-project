@@ -56,7 +56,7 @@ public class ServerState {
 
   // Retrieves tuples matching a pattern, locking them for the client if not already locked.
   public synchronized ArrayList<String> takePhase1(String searchPattern, int clientId) {
-    ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase1} Taking tuple matching pattern: " + searchPattern);
+    ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase1} Taking tuple matching pattern: " + searchPattern + " for client: " + clientId);
 
     ArrayList<String> takenTuples = new ArrayList<>();
     boolean tuplesNotFound = true;
@@ -123,14 +123,12 @@ public class ServerState {
     Iterator<TupleEntry> iterator = tuples.iterator();
     while (iterator.hasNext()) {
       TupleEntry tupleEntry = iterator.next();
-      System.out.println("LOCKED BY " + tupleEntry.getLockedByClientID() + " for client: " + clientId); // TODO: remove
-      if (tupleEntry.getTuple().equals(tuple)) { // && tupleEntry.getLockedByClientID() == clientId fixme voltar aqui
+      if (tupleEntry.getTuple().equals(tuple)) {
         iterator.remove();
       }
     }
 
-    ServerMain.debug(ServerState.class.getSimpleName(),
-        "{takePhase3} Tuple removed: " + tuple + " for client: " + clientId);
+    ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase3} Tuple removed: " + tuple + " for client: " + clientId);
   }
 
   public synchronized ArrayList<String> getTupleSpacesState() {

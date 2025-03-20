@@ -163,8 +163,6 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
 
         String[] delays = {delay1, delay2, delay3};
 
-        System.out.println("Delays: " + delay1 + " " + delay2 + " " + delay3); // TODO: remove
-
         TupleSpacesReplicaOuterClass.TakePhase1Request phase1Request = TupleSpacesReplicaOuterClass.TakePhase1Request.newBuilder()
             .setSearchPattern(searchPattern)
             .setClientId(clientId)
