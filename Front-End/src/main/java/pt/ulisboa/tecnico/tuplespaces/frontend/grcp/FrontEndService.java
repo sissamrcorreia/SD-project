@@ -142,6 +142,7 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received take request: " + request);
 
         int clientId = request.getClientId();
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Take Client ID: " + clientId);
         String searchPattern = request.getSearchPattern();
 
         // Determine the voter set for this client
@@ -152,14 +153,33 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded take request");
         TakePhase1Observer phase1Observer = new TakePhase1Observer(phase1Collector);
 
+        String delay1 = DelayInterceptor.CTX_DELAY1.get(Context.current());
+        String delay2 = DelayInterceptor.CTX_DELAY2.get(Context.current());
+        String delay3 = DelayInterceptor.CTX_DELAY3.get(Context.current());
+
+        delay1 = delay1 == null ? "0" : delay1;
+        delay2 = delay2 == null ? "0" : delay2;
+        delay3 = delay3 == null ? "0" : delay3;
+
+        String[] delays = {delay1, delay2, delay3};
+
+        System.out.println("Delays: " + delay1 + " " + delay2 + " " + delay3); // TODO: remove
+
         TupleSpacesReplicaOuterClass.TakePhase1Request phase1Request = TupleSpacesReplicaOuterClass.TakePhase1Request.newBuilder()
             .setSearchPattern(searchPattern)
             .setClientId(clientId)
             .build();
 
         for (int i = 0 ; i < numServers; i++) {
+            Metadata metadata = new Metadata();
+            metadata.put(Metadata.Key.of("delay", Metadata.ASCII_STRING_MARSHALLER), delays[i]);
+            FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending take request to server " + i + " with delay " + delays[i]);
+
+            TupleSpacesReplicaGrpc.TupleSpacesReplicaStub stubWithMetadata = this.stub[i]
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
+
             FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending Phase 1 request to server " + i);
-            this.stub[i].takePhase1(phase1Request, phase1Observer);
+            stubWithMetadata.takePhase1(phase1Request, phase1Observer);
         }
 
         // Wait for responses from all voters
@@ -234,10 +254,6 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
         }
         collector.waitUntilAllReceived(numServers);
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "All server responses received");
-
-        for (List<String> response : collector.getAll()) {
-            System.out.println("Current timestamp: " + System.currentTimeMillis() + " response: " + response);
-        }
 
 
         TupleSpacesOuterClass.getTupleSpacesStateResponse.Builder responseBuilder = TupleSpacesOuterClass.getTupleSpacesStateResponse.newBuilder();

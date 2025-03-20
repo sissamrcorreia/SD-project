@@ -1,8 +1,8 @@
 package pt.ulisboa.tecnico.tuplespaces.server.domain;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 import pt.ulisboa.tecnico.tuplespaces.server.ServerMain;
 import pt.ulisboa.tecnico.tuplespaces.server.util.TupleEntry;
@@ -20,7 +20,7 @@ public class ServerState {
     ServerMain.debug(ServerState.class.getSimpleName(), "Adding tuple: " + tuple);
     tuples.add(new TupleEntry(tuple));
 
-    // notify all waiting threads
+    // Notify all waiting threads
     notifyAll();
   }
 
@@ -28,7 +28,8 @@ public class ServerState {
     for (TupleEntry tupleEntry : this.tuples) {
       String tuple = tupleEntry.getTuple();
       if (tuple.matches(pattern)) {
-        ServerMain.debug(ServerState.class.getSimpleName(), "Found tuple matching pattern: " + pattern + " -> " + tuple);
+        ServerMain.debug(ServerState.class.getSimpleName(),
+            "Found tuple matching pattern: " + pattern + " -> " + tuple);
         return tuple;
       }
     }
@@ -41,9 +42,9 @@ public class ServerState {
     String tuple = getMatchingTuple(pattern);
     while (tuple == null) {
       try {
-        // release the lock and put the thread on hold
+        // Release the lock and put the thread on hold
         wait();
-        // when notified, reacquire lock and try again
+        // When notified, reacquire lock and try again
         tuple = getMatchingTuple(pattern);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
@@ -53,36 +54,47 @@ public class ServerState {
     return tuple;
   }
 
+  // Retrieves tuples matching a pattern, locking them for the client if not already locked.
   public synchronized ArrayList<String> takePhase1(String searchPattern, int clientId) {
     ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase1} Taking tuple matching pattern: " + searchPattern);
+
     ArrayList<String> takenTuples = new ArrayList<>();
     boolean tuplesNotFound = true;
 
-    while(tuplesNotFound) {
+    while (tuplesNotFound) {
       for (TupleEntry tupleEntry : this.tuples) {
         if (tupleEntry.getTuple().matches(searchPattern)) {
-          if (tupleEntry.isLocked()) { // if there is one lock, return an empty list
-            ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase1} Tuple is locked: " + tupleEntry.getTuple());
+
+          // If the tuple is locked, release all locks for the client and return an empty list
+          if (tupleEntry.isLocked()) {
+
+            ServerMain.debug(ServerState.class.getSimpleName(),
+                "{takePhase1} Tuple is locked: " + tupleEntry.getTuple());
             takePhase2(clientId);
             return new ArrayList<>();
+
           } else {
-            System.out.println("Tuple is not locked");
+            // If the tuple is not locked, lock it for the client and add it to the result list
+            ServerMain.debug(ServerState.class.getSimpleName(),
+                "{takePhase1} Tuple is not locked: " + tupleEntry.getTuple());
             tupleEntry.setLocked(true);
             tupleEntry.setLockedByClientID(clientId);
             takenTuples.add(tupleEntry.getTuple());
           }
         }
       }
-      // if any tuples were found, stop waiting
+      // If no tuples were found, wait for a new tuple to be added
       if (takenTuples.isEmpty()) {
         try {
-          System.out.println("Waiting for tuple");
-          wait(); // wait until a tuple is added
+          ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase1} Waiting for new tuple");
+          wait(); // Release the lock and wait until notified
+
         } catch (InterruptedException e) {
           throw new RuntimeException(e);
         }
-      } else{
-        System.out.println("Tuple found");
+      } else {
+        // If tuples were found, stop waiting
+        ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase1} Tuple found");
         tuplesNotFound = false;
       }
     }
@@ -91,9 +103,12 @@ public class ServerState {
     return takenTuples;
   }
 
+  // Method to release locks held by a specific client
   public synchronized void takePhase2(int clientId) {
     ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase2} Releasing locks for client: " + clientId);
+
     for (TupleEntry tupleEntry : this.tuples) {
+      // Check if the tuple is locked by the given client
       if (tupleEntry.getLockedByClientID() == clientId) {
         tupleEntry.setLocked(false);
         tupleEntry.setLockedByClientID(-1);
@@ -101,22 +116,27 @@ public class ServerState {
     }
   }
 
+  // Method to remove a tuple from the tuple space for a specific client
   public synchronized void takePhase3(String tuple, int clientId) {
-    ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase3} Removing tuple: " + tuple + " for client: " + clientId);
+    ServerMain.debug(ServerState.class.getSimpleName(),
+        "{takePhase3} Removing tuple: " + tuple + " for client: " + clientId);
     Iterator<TupleEntry> iterator = tuples.iterator();
     while (iterator.hasNext()) {
-        TupleEntry tupleEntry = iterator.next();
-        if (tupleEntry.getTuple().equals(tuple)) { // && tupleEntry.getLockedByClientID() == clientId
-          iterator.remove();
-        }
+      TupleEntry tupleEntry = iterator.next();
+      System.out.println("LOCKED BY " + tupleEntry.getLockedByClientID() + " for client: " + clientId); // TODO: remove
+      if (tupleEntry.getTuple().equals(tuple)) { // && tupleEntry.getLockedByClientID() == clientId fixme voltar aqui
+        iterator.remove();
+      }
     }
-    ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase3} Tuple removed: " + tuple + " for client: " + clientId);
-}
+
+    ServerMain.debug(ServerState.class.getSimpleName(),
+        "{takePhase3} Tuple removed: " + tuple + " for client: " + clientId);
+  }
 
   public synchronized ArrayList<String> getTupleSpacesState() {
     ServerMain.debug(ServerState.class.getSimpleName(), "Returning all tuples");
     ArrayList<String> tupleSpacesState = new ArrayList<>();
-    for (TupleEntry tupleEntry : this.tuples){
+    for (TupleEntry tupleEntry : this.tuples) {
       tupleSpacesState.add(tupleEntry.getTuple());
     }
     return tupleSpacesState;

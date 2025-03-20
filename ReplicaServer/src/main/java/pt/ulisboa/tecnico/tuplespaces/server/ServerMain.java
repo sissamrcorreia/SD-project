@@ -40,9 +40,6 @@ public class ServerMain {
       }
       debug(ServerMain.class.getSimpleName(), String.format("Received %d arguments", args.length));
 
-
-
-
       // Check arguments
       if (args.length < 1) {
         System.err.println("Argument(s) missing!");

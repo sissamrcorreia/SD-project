@@ -102,9 +102,14 @@ public class ClientService {
   public String take(String[] split) {
     try {
       String pattern = split[1];
+      TupleSpacesBlockingStub _stub = this.stub;
+      if (split.length == 5) {
+        ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " adding metadata to stub");
+        _stub = addMetadataToStub(split);
+      }
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " taking tuple " + pattern);
-      TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
-      TakeResponse response = this.stub.take(request);
+      TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).setClientId(client_id).build();
+      TakeResponse response = _stub.take(request);
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " take tuple with pattern " + pattern + " and got " + response.getResult());
 
       System.out.println("OK");
