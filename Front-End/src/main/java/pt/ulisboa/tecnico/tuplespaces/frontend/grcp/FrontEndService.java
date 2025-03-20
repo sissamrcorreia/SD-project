@@ -1,28 +1,29 @@
 package pt.ulisboa.tecnico.tuplespaces.frontend.grcp;
 
+import java.util.List;
 import io.grpc.Context;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+
+import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
+import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass;
 
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaGrpc;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass;
 
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
-
+import pt.ulisboa.tecnico.tuplespaces.frontend.DelayInterceptor;
 import pt.ulisboa.tecnico.tuplespaces.frontend.FrontEndMain;
 import pt.ulisboa.tecnico.tuplespaces.frontend.util.FrontEndResponseCollector;
-// import pt.ulisboa.tecnico.tuplespaces.frontend.util.FrontEndResponseListsCollector;
+import pt.ulisboa.tecnico.tuplespaces.frontend.util.FrontEndResponseListsCollector;
 import pt.ulisboa.tecnico.tuplespaces.frontend.util.GetTupleSpacesStateObserver;
 import pt.ulisboa.tecnico.tuplespaces.frontend.util.PutObserver;
-import pt.ulisboa.tecnico.tuplespaces.frontend.DelayInterceptor;
 import pt.ulisboa.tecnico.tuplespaces.frontend.util.ReadObserver;
-// import pt.ulisboa.tecnico.tuplespaces.frontend.util.TakePhase1Observer;
-// import pt.ulisboa.tecnico.tuplespaces.frontend.util.TakePhase2Observer;
-// import pt.ulisboa.tecnico.tuplespaces.frontend.util.TakePhase3Observer;
+import pt.ulisboa.tecnico.tuplespaces.frontend.util.TakePhase1Observer;
+import pt.ulisboa.tecnico.tuplespaces.frontend.util.TakePhase2Observer;
+import pt.ulisboa.tecnico.tuplespaces.frontend.util.TakePhase3Observer;
 
 public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
     private final ManagedChannel[] channels;
@@ -80,8 +81,6 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
 
         // Wait all servers response
         collector.waitUntilAllReceived(numServers);
-
-        // TODO: msg no discord
         
         // Send the response back to the client
         TupleSpacesOuterClass.PutResponse response = TupleSpacesOuterClass.PutResponse.newBuilder().build();
@@ -128,8 +127,6 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
         // Wait for only one server response
         collector.waitUntilAllReceived(1);
 
-        // TODO: msg no discord
-
         TupleSpacesOuterClass.ReadResponse response = TupleSpacesOuterClass.ReadResponse.newBuilder().setResult(collector.getString(0)).build();
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded read request with response: " + response);
 
@@ -140,118 +137,117 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sent read response");
     }
 
-    // @Override
-    // public void take(TupleSpacesOuterClass.TakeRequest request, StreamObserver<TupleSpacesOuterClass.TakeResponse> responseObserver) {
-    //     FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received take request: " + request);
+    @Override
+    public void take(TupleSpacesOuterClass.TakeRequest request, StreamObserver<TupleSpacesOuterClass.TakeResponse> responseObserver) {
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received take request: " + request);
 
-    //     // Phase 1: Reserve tuples that match the search pattern
-    //     FrontEndResponseListsCollector phase1Collector = executeTakePhase1(request);
+        int clientId = request.getClientId();
+        String searchPattern = request.getSearchPattern();
 
-    //     // Phase 2: Confirm the reservation of the tuples
-    //     FrontEndResponseCollector phase2Collector = executeTakePhase2(request, phase1Collector);
+        // Determine the voter set for this client
+        int[] voterSet = {clientId % numServers, (clientId + 1) % numServers};
 
-    //     // Phase 3: Remove the tuple from the TupleSpace
-    //     FrontEndResponseCollector phase3Collector = executeTakePhase3(request, phase1Collector);
+        // Phase 1: Request to enter the critical section (Maekawa)
+        FrontEndResponseListsCollector phase1Collector = new FrontEndResponseListsCollector();
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded take request");
+        TakePhase1Observer phase1Observer = new TakePhase1Observer(phase1Collector);
 
-    //     // Build and send the response to the client
-    //     TupleSpacesOuterClass.TakeResponse response = TupleSpacesOuterClass.TakeResponse.newBuilder()
-    //         .setResult(phase1Collector.getList(0).get(0))
-    //         .build(); //FIXME
+        TupleSpacesReplicaOuterClass.TakePhase1Request phase1Request = TupleSpacesReplicaOuterClass.TakePhase1Request.newBuilder()
+            .setSearchPattern(searchPattern)
+            .setClientId(clientId)
+            .build();
 
-    //     // TupleSpacesOuterClass.TakeResponse response = TupleSpacesOuterClass.TakeResponse.newBuilder()
-    //     // .setResult(phase1Collector.getStringList(0).get(0))
-    //     // .build();
+        for (int i = 0 ; i < numServers; i++) {
+            FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending Phase 1 request to server " + i);
+            this.stub[i].takePhase1(phase1Request, phase1Observer);
+        }
 
-    //     // Send the response to the client
-    //     responseObserver.onNext(response);
-    //     responseObserver.onCompleted();
+        // Wait for responses from all voters
+        phase1Collector.waitUntilAllReceived(voterSet.length);
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Phase 1 completed.");
 
-    //     FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sent take response");
-    // }
+        // Select a tuple to take
+        List<String> reservedTuples = phase1Collector.getList(0);
+        String selectedTuple = reservedTuples.isEmpty() ? "" : reservedTuples.get(0);
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Selected tuple: " + selectedTuple);
 
-    // // Executes Phase 1 of the take operation: Reserve tuples that match the search pattern.
-    // private FrontEndResponseListsCollector executeTakePhase1(TupleSpacesOuterClass.TakeRequest request) {
-    //     FrontEndResponseListsCollector phase1Collector = new FrontEndResponseListsCollector();
-    //     TakePhase1Observer phase1Observer = new TakePhase1Observer(phase1Collector);
+        // Phase 2: Confirm the take operation
+        FrontEndResponseCollector phase2Collector = new FrontEndResponseCollector();
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Starting Phase 2.");
+        TakePhase2Observer phase2Observer = new TakePhase2Observer(phase2Collector);
 
-    //     TupleSpacesReplicaOuterClass.TakePhase1Request phase1Request = TupleSpacesReplicaOuterClass.TakePhase1Request.newBuilder()
-    //         .setSearchPattern(request.getSearchPattern())
-    //         .build();
+        TupleSpacesReplicaOuterClass.TakePhase2Request phase2Request = TupleSpacesReplicaOuterClass.TakePhase2Request.newBuilder()
+            .setSelectedTuple(selectedTuple)
+            .setClientId(clientId)
+            .build();
 
-    //     // Send phase1Request to all servers
-    //     for (int i = 0; i < numServers; i++) {
-    //         this.stub[i].takePhase1(phase1Request, phase1Observer);
-    //     }
+        for (int i = 0; i < numServers; i++) {
+            FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending Phase 2 request to server " + i);
+            this.stub[i].takePhase2(phase2Request, phase2Observer);
+        }
 
-    //     // Wait for all servers to respond
-    //     phase1Collector.waitUntilAllReceived(numServers);
-    //     return phase1Collector; // collector containing the reserved tuples from all servers
-    // }
+        // Wait for responses from all replicas
+        phase2Collector.waitUntilAllReceived(numServers);
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Phase 2 completed.");
 
-    // // Executes Phase 2 of the take operation: Confirm the reservation of the tuples.
-    // private FrontEndResponseCollector executeTakePhase2(TupleSpacesOuterClass.TakeRequest request, FrontEndResponseListsCollector phase1Collector) {
-    //     FrontEndResponseCollector phase2Collector = new FrontEndResponseCollector();
-    //     TakePhase2Observer phase2Observer = new TakePhase2Observer(phase2Collector);
+        // Phase 3: Release the critical section (Maekawa)
+        FrontEndResponseCollector phase3Collector = new FrontEndResponseCollector();
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Starting Phase 3.");
+        TakePhase3Observer phase3Observer = new TakePhase3Observer(phase3Collector);
 
-    //     // phase2Request with the reserved tuples from Phase 1
-    //     TupleSpacesReplicaOuterClass.TakePhase2Request phase2Request = TupleSpacesReplicaOuterClass.TakePhase2Request.newBuilder()
-    //         .setSearchPattern(request.getSearchPattern()) //FIXME
-    //         .addAllReservedTuples(phase1Collector.getList(0))
-    //         .build();
+        TupleSpacesReplicaOuterClass.TakePhase3Request phase3Request = TupleSpacesReplicaOuterClass.TakePhase3Request.newBuilder()
+            .setTuple(selectedTuple)
+            .setClientId(clientId)
+            .build();
 
-    //     // Send phase2Request to all servers
-    //     for (int i = 0; i < numServers; i++) {
-    //         this.stub[i].takePhase2(phase2Request, phase2Observer);
-    //     }
+        for (int i = 0; i < numServers; i++) {
+            FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending Phase 3 request to server " + i);
+            this.stub[i].takePhase3(phase3Request, phase3Observer);
+        }
 
-    //     // Wait for all servers to respond
-    //     phase2Collector.waitUntilAllReceived(numServers);
-    //     return phase2Collector; // collector containing the confirmation responses from all servers
-    // }
+        // Wait for responses from all voters
+        phase3Collector.waitUntilAllReceived(voterSet.length);
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Phase 3 completed.");
 
-    // // Executes Phase 3 of the take operation: Remove the tuple from the TupleSpace.
-    // private FrontEndResponseCollector executeTakePhase3(TupleSpacesOuterClass.TakeRequest request, FrontEndResponseListsCollector phase1Collector) {
-    //     FrontEndResponseCollector phase3Collector = new FrontEndResponseCollector();
-    //     TakePhase3Observer phase3Observer = new TakePhase3Observer(phase3Collector);
+        // Send the response back to the client
+        TupleSpacesOuterClass.TakeResponse response = TupleSpacesOuterClass.TakeResponse.newBuilder()
+            .setResult(selectedTuple)
+            .build();
 
-    //     // phase3Request with the reserved tuples from Phase 1
-    //     TupleSpacesReplicaOuterClass.TakePhase3Request phase3Request = TupleSpacesReplicaOuterClass.TakePhase3Request.newBuilder()
-    //         .setSearchPattern(request.getSearchPattern()) //FIXME
-    //         .addAllReservedTuples(phase1Collector.getList(0))
-    //         .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
 
-    //     // Send phase3Request to all servers
-    //     for (int i = 0; i < numServers; i++) {
-    //         this.stub[i].takePhase3(phase3Request, phase3Observer);
-    //     }
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sent take response");
+    }
 
-    //     // Wait for all servers to respond
-    //     phase3Collector.waitUntilAllReceived(numServers);
-    //     return phase3Collector; // collector containing the removal confirmation responses from all servers
-    // }
-
-
-    // FIXME: não está a imprimir todos os servidores
     public void getTupleSpacesState(TupleSpacesOuterClass.getTupleSpacesStateRequest request,
                                     StreamObserver<TupleSpacesOuterClass.getTupleSpacesStateResponse> responseObserver) {
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received getTupleSpacesState request");
         
-        FrontEndResponseCollector collector = new FrontEndResponseCollector();
-        GetTupleSpacesStateObserver observer = new GetTupleSpacesStateObserver(collector);
-
+        // FrontEndResponseCollector collector = new FrontEndResponseCollector();
+        FrontEndResponseListsCollector collector = new FrontEndResponseListsCollector();
         TupleSpacesReplicaOuterClass.getTupleSpacesStateRequest replicaRequest = TupleSpacesReplicaOuterClass.getTupleSpacesStateRequest.newBuilder().build();
         
         // Forward the request to the backend server
         for (int i = 0; i < numServers; i++) {
-            this.stub[i].getTupleSpacesState(replicaRequest, observer);
+            this.stub[i].getTupleSpacesState(replicaRequest, new GetTupleSpacesStateObserver(collector));
         }
         collector.waitUntilAllReceived(numServers);
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "All server responses received");
 
-        // TODO: msg no discord
+        for (List<String> response : collector.getAll()) {
+            System.out.println("Current timestamp: " + System.currentTimeMillis() + " response: " + response);
+        }
 
-        TupleSpacesOuterClass.getTupleSpacesStateResponse response = TupleSpacesOuterClass.getTupleSpacesStateResponse.newBuilder()
-        .addAllTuple(collector.getStringList())
-        .build();
+
+        TupleSpacesOuterClass.getTupleSpacesStateResponse.Builder responseBuilder = TupleSpacesOuterClass.getTupleSpacesStateResponse.newBuilder();
+
+        // Add lits one by one
+        for (List<String> tupleList : collector.getAll()) {
+            responseBuilder.addAllTuple(tupleList);
+        }
+
+        TupleSpacesOuterClass.getTupleSpacesStateResponse response = responseBuilder.build();
 
         // Send the response back to the client
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded getTupleSpacesState request with response: " + response);

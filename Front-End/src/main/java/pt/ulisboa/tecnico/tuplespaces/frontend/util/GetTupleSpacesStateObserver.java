@@ -6,9 +6,9 @@ import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplic
 
 import java.util.ArrayList;
 public class GetTupleSpacesStateObserver implements StreamObserver<getTupleSpacesStateResponse> {
-    FrontEndResponseCollector collector;
+    FrontEndResponseListsCollector collector;
 
-    public GetTupleSpacesStateObserver(FrontEndResponseCollector c) {
+    public GetTupleSpacesStateObserver(FrontEndResponseListsCollector c) {
         this.collector = c;
     }
 
@@ -16,6 +16,7 @@ public class GetTupleSpacesStateObserver implements StreamObserver<getTupleSpace
     public void onNext(getTupleSpacesStateResponse value) {
         ArrayList<String> tupleSpacesState = new ArrayList<>(value.getTupleList());
         collector.addStringList(tupleSpacesState);
+        FrontEndMain.debug(GetTupleSpacesStateObserver.class.getSimpleName(), "Received response: " + tupleSpacesState);
     }
 
     @Override

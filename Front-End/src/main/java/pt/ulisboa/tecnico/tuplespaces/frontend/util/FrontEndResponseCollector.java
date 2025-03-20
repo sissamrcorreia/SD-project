@@ -11,15 +11,20 @@ public class FrontEndResponseCollector {
     }
 
     synchronized public void addString(String s) {
-        collectedResponses.add(s);
-        notifyAll();
+        if (s != null && !s.isEmpty()) {
+            collectedResponses.add(s);
+            notifyAll();
+        }
     }
 
     synchronized public void addStringList(List<String> list) {
-        if (list.isEmpty())
+        if (list.isEmpty()) {
             collectedResponses.add("[]");
-        else
+        }
+        else {
             collectedResponses.addAll(list);
+        }
+        
         notifyAll();
     }
 
@@ -28,11 +33,14 @@ public class FrontEndResponseCollector {
     }
 
     synchronized public String getString(int n) {
-        return collectedResponses.get(n);
+        if (n >= 0 && n < collectedResponses.size()) {
+            return collectedResponses.get(n);
+        }
+        return null;
     }
 
     synchronized public ArrayList<String> getStringList() {
-        return collectedResponses;
+        return new ArrayList<>(collectedResponses);
     }
 
     synchronized public void waitUntilAllReceived(int n) {

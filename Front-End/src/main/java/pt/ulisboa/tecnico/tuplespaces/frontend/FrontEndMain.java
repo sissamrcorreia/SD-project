@@ -44,14 +44,14 @@ public class FrontEndMain {
         }
         debug(FrontEndMain.class.getSimpleName(), String.format("Received %d arguments", args.length));
 
-        // check arguments
+        // Check arguments
         if (args.length < 4) {
             System.err.println("Argument(s) missing!");
-            System.err.println("Usage: mvn exec:java -Dexec.args=<host:port> <client_port>"); // TODO: Update usage
+            System.err.println("Usage: mvn exec:java -Dexec.args=<port> <host1:port1> <host2:port2> <host3:port3>");
             return;
         }
 
-        // get the ports
+        // Get the ports
         final int port = Integer.parseInt(args[0]);
         String tupleSpacesHost_port1 = args[1];
         String tupleSpacesHost_port2 = args[2];

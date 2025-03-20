@@ -23,6 +23,7 @@ message TakePhase1Response {
 }
 
 message TakePhase2Request {
+  string selectedTuple = 1;
   int32 clientId = 2;
 }
 

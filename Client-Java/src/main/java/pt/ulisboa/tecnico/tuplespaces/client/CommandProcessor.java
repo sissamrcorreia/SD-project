@@ -39,7 +39,7 @@ public class CommandProcessor {
                     break;
 
                 case TAKE:
-                    // this.take(split);
+                    this.take(split);
                     break;
 
                 case GET_TUPLE_SPACES_STATE:
@@ -105,28 +105,28 @@ public class CommandProcessor {
     }
 
 
-    // private void take(String[] split) {
-    //      // check if input is valid
-    //     if (!this.inputIsValid(split)) {
-    //         this.printUsage();
-    //         return;
-    //     }
+    private void take(String[] split) {
+         // check if input is valid
+        if (!this.inputIsValid(split)) {
+            this.printUsage();
+            return;
+        }
 
-    //     // get the tuple
-    //     String tuple = split[1];
-    //     ClientMain.debug(CommandProcessor.class.getSimpleName(), "take: " + tuple);
+        // get the tuple
+        String tuple = split[1];
+        ClientMain.debug(CommandProcessor.class.getSimpleName(), "take: " + tuple);
 
-    //     // take the tuple
-    //     String response = this.clientService.take(split);
+        // take the tuple
+        String response = this.clientService.take(split);
 
-    //     if (response != null) {
-    //         System.out.println(response);
-    //     } else {
-    //         // Server is down
-    //         return;
-    //     }
-    //     System.out.println();
-    // }
+        if (response != null) {
+            System.out.println(response);
+        } else {
+            // Server is down
+            return;
+        }
+        System.out.println();
+    }
 
     private void getTupleSpacesState() {
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "getTupleSpacesState");
@@ -161,16 +161,16 @@ public class CommandProcessor {
     }
 
     private void printUsage() {
-        System.out.println("Usage:\n" + // TODO: change the message
-                "- put <element[,more_elements]> [delay1] [delay2] [delay3]\n" +
-                "- read <element[,more_elements]> [delay1] [delay2] [delay3]\n" +
-                "- take <element[,more_elements]> [delay1] [delay2] [delay3]\n" +
+        System.out.println("Usage:\n" +
+                "- put <element[,more_elements]> [delay1 delay2 delay3]\n" +
+                "- read <element[,more_elements]> [delay1 delay2 delay3]\n" +
+                "- take <element[,more_elements]> [delay1 delay2 delay3]\n" +
                 "- getTupleSpacesState\n" +
                 "- sleep <integer>\n" +
                 "- exit\n");
     }
 
-    private boolean inputIsValid(String[] input){ // TODO: Check this later for improvements
+    private boolean inputIsValid(String[] input){
         if (input.length < 2
             ||
             !input[1].substring(0,1).equals(BGN_TUPLE)

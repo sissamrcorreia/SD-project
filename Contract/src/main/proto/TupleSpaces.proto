@@ -17,6 +17,7 @@ message ReadResponse {
 
 message TakeRequest {
   string searchPattern = 1;
+  int32 clientId = 2;
 }
 message TakeResponse {
   string result = 1;

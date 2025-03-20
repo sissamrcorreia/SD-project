@@ -99,24 +99,23 @@ public class ClientService {
 
   // Accepts a tuple description and returns one tuple that matches the description.
   // This operation blocks the client until a tuple that satisfies the description exists. The tuple is removed from the tuple space.
-  // TODO: B.2
-  // public String take(String[] split) {
-  //   try {
-  //     String pattern = split[1];
-  //     ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " taking tuple " + pattern);
-  //     TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
-  //     TakeResponse response = this.stub.take(request);
-  //     ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " take tuple with pattern " + pattern + " and got " + response.getResult());
+  public String take(String[] split) {
+    try {
+      String pattern = split[1];
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " taking tuple " + pattern);
+      TakeRequest request = TakeRequest.newBuilder().setSearchPattern(pattern).build();
+      TakeResponse response = this.stub.take(request);
+      ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " take tuple with pattern " + pattern + " and got " + response.getResult());
 
-  //     System.out.println("OK");
-  //     return response.getResult();
+      System.out.println("OK");
+      return response.getResult();
 
-  //   } catch (StatusRuntimeException e) {
-  //     System.out.println("Server is down. Please try again later.");
-  //     System.out.println();
-  //     return null;
-  //   }
-  // }
+    } catch (StatusRuntimeException e) {
+      System.out.println("Server is down. Please try again later.");
+      System.out.println();
+      return null;
+    }
+  }
 
   // Does not take arguments and returns a list of all tuples on each server.
   public void getTupleSpacesState() {
