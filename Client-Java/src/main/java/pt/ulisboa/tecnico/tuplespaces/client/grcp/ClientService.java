@@ -4,7 +4,10 @@ import com.google.protobuf.ProtocolStringList;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.StatusRuntimeException;
+import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;
+import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
+import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc.TupleSpacesBlockingStub;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.PutRequest;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.ReadRequest;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.ReadResponse;
@@ -13,11 +16,6 @@ import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.getTupleSpacesStateRequest;
 import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesOuterClass.getTupleSpacesStateResponse;
 import pt.ulisboa.tecnico.tuplespaces.client.ClientMain;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc;
-import pt.ulisboa.tecnico.tuplespaces.centralized.contract.TupleSpacesGrpc.TupleSpacesBlockingStub;
-
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
 
 public class ClientService {
   private ManagedChannel channel;
@@ -48,7 +46,7 @@ public class ClientService {
     metadata.put(DELAY_2, split[3]);
     metadata.put(DELAY_3, split[4]);
 
-    return this.stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor((metadata))); // TODO: check if this is the correct way to add metadata to the stub
+    return this.stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor((metadata)));
   }
 
   // Adds tuple t to the tuple space
@@ -66,9 +64,8 @@ public class ClientService {
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " put tuple " + tuple);
       System.out.println("OK");
 
-    } catch (StatusRuntimeException e) {
+    } catch (RuntimeException e) {
       System.out.println("Server is down. Please try again later.");
-      System.out.println(e.toString()); // TODO: DELETE
     }
   }
 
@@ -90,9 +87,8 @@ public class ClientService {
       System.out.println("OK");
       return response.getResult();
 
-    } catch (StatusRuntimeException e) {
+    } catch (RuntimeException e) {
       System.out.println("Server is down. Please try again later.");
-      System.out.println();
       return null;
     }
   }
@@ -115,9 +111,8 @@ public class ClientService {
       System.out.println("OK");
       return response.getResult();
 
-    } catch (StatusRuntimeException e) {
+    } catch (RuntimeException e) {
       System.out.println("Server is down. Please try again later.");
-      System.out.println();
       return null;
     }
   }
@@ -134,7 +129,7 @@ public class ClientService {
       System.out.println(TupleList);
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " received the full tuple space state");
 
-    } catch (StatusRuntimeException e ) {
+    } catch (RuntimeException e ) {
       System.out.println("Server is down. Please try again later.");
     }
   }

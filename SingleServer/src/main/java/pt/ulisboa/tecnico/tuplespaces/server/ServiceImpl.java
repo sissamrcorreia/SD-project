@@ -19,6 +19,7 @@ public class ServiceImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
     public void put(PutRequest request, StreamObserver<PutResponse> responseObserver) {
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "Received put request: " + request.getNewTuple());
         state.put(request.getNewTuple());
+
         PutResponse response = PutResponse.newBuilder().build();
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending put response");
         responseObserver.onNext(response);
@@ -30,6 +31,7 @@ public class ServiceImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
     public void read(ReadRequest request, StreamObserver<ReadResponse> responseObserver) {
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "Received read request: " + request.getSearchPattern());
         String tuple = state.read(request.getSearchPattern());
+
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending read response: " + tuple);
         ReadResponse response = ReadResponse.newBuilder().setResult(tuple).build();
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending read response: " + response);
@@ -42,6 +44,7 @@ public class ServiceImpl extends TupleSpacesGrpc.TupleSpacesImplBase {
     public void take(TakeRequest request, StreamObserver<TakeResponse> responseObserver) {
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "Received take request: " + request.getSearchPattern());
         String tuple = state.take(request.getSearchPattern());
+        
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending take response: " + tuple);
         TakeResponse response = TakeResponse.newBuilder().setResult(tuple).build();
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "Sending take response: " + response);

@@ -36,14 +36,14 @@ public class ClientMain {
           }
           debug(ClientMain.class.getSimpleName(), String.format("Received %d arguments", args.length));
 
-        // check arguments
+        // Check arguments
         if (args.length < 2) {
             System.err.println("Argument(s) missing!");
             System.err.println("Usage: mvn exec:java -Dexec.args=<host:port> <client_id>");
             return;
         }
 
-        // get the host and the port of the server or front-end
+        // Get the host and the port of the server or front-end
         final String host_port = args[0];
         final int client_id = Integer.parseInt(args[1]);
         debug(ClientMain.class.getSimpleName(), "Client will connect to " + host_port + " with id " + client_id);

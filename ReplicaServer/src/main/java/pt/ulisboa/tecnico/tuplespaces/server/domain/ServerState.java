@@ -54,7 +54,7 @@ public class ServerState {
     return tuple;
   }
 
-  // Retrieves tuples matching a pattern, locking them for the client if not already locked.
+  // Method to retrieve tuples matching a pattern, locking them for the client if not already locked.
   public synchronized ArrayList<String> takePhase1(String searchPattern, int clientId) {
     ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase1} Taking tuple matching pattern: " + searchPattern + " for client: " + clientId);
 
@@ -118,8 +118,7 @@ public class ServerState {
 
   // Method to remove a tuple from the tuple space for a specific client
   public synchronized void takePhase3(String tuple, int clientId) {
-    ServerMain.debug(ServerState.class.getSimpleName(),
-        "{takePhase3} Removing tuple: " + tuple + " for client: " + clientId);
+    ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase3} Removing tuple: " + tuple + " for client: " + clientId);
     Iterator<TupleEntry> iterator = tuples.iterator();
     while (iterator.hasNext()) {
       TupleEntry tupleEntry = iterator.next();

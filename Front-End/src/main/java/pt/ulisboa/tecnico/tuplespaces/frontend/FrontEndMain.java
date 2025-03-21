@@ -5,10 +5,7 @@ import java.util.List;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-
 import pt.ulisboa.tecnico.tuplespaces.frontend.grcp.FrontEndService;
-
-// TODO: state -> impl -> onerror FE-> service cliente -> command processor
 
 public class FrontEndMain {
     // Set flag to true to print debug messages.

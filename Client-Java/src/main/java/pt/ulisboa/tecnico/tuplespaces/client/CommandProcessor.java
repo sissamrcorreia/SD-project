@@ -64,37 +64,37 @@ public class CommandProcessor {
     }
 
     private void put(String[] split){
-        // check if input is valid
+        // Check if input is valid
         if (!this.inputIsValid(split)) {
             this.printUsage();
             return;
         }
 
-        // get the tuple
+        // Get the tuple
         String tuple = split[1];
 
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "put: " + tuple);
 
-        // put the tuple
+        // Put the tuple
         this.clientService.put(split);
         System.out.println();
     }
 
     private void read(String[] split){
-        // check if input is valid
+        // Check if input is valid
         if (!this.inputIsValid(split)) {
             this.printUsage();
             return;
         }
 
-        // get the tuple
+        // Get the tuple
         String tuple = split[1];
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "read: " + tuple);
 
-        // read the tuple
+        // Read the tuple
         String result = this.clientService.read(split);
 
-        // print the result if
+        // Print the result if
         if (result != null) {
             System.out.println(result);
         } else {
@@ -106,17 +106,17 @@ public class CommandProcessor {
 
 
     private void take(String[] split) {
-         // check if input is valid
+         // Check if input is valid
         if (!this.inputIsValid(split)) {
             this.printUsage();
             return;
         }
 
-        // get the tuple
+        // Get the tuple
         String tuple = split[1];
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "take: " + tuple);
 
-        // take the tuple
+        // Take the tuple
         String response = this.clientService.take(split);
 
         if (response != null) {
@@ -131,7 +131,7 @@ public class CommandProcessor {
     private void getTupleSpacesState() {
         ClientMain.debug(CommandProcessor.class.getSimpleName(), "getTupleSpacesState");
 
-        // get the tuple spaces state
+        // Get the tuple spaces state
         this.clientService.getTupleSpacesState();
 
         System.out.println();
@@ -144,7 +144,7 @@ public class CommandProcessor {
       }
       Integer time;
 
-      // checks if input String can be parsed as an Integer
+      // Checks if input String can be parsed as an Integer
       try {
          time = Integer.parseInt(split[1]);
       } catch (NumberFormatException e) {
@@ -170,8 +170,8 @@ public class CommandProcessor {
                 "- exit\n");
     }
 
-    private boolean inputIsValid(String[] input){
-        if (input.length < 2
+    private boolean inputIsValid(String[] input){ 
+        if (input.length < 2 // Checks for valid tuple structure for put, read and take
             ||
             !input[1].substring(0,1).equals(BGN_TUPLE)
             ||
@@ -179,7 +179,7 @@ public class CommandProcessor {
             ) {
             return false;
         }
-        else if (input.length > 2) {
+        else if (input.length > 2) { // Checks for valid delay values
             if( input.length == 5) {
                 for (int i = 2; i < input.length; i++) {
                     try {
