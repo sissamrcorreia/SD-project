@@ -12,8 +12,6 @@ import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplic
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.TakePhase1Response;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.TakePhase2Request;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.TakePhase2Response;
-import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.TakePhase3Request;
-import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.TakePhase3Response;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.getTupleSpacesStateRequest;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass.getTupleSpacesStateResponse;
 import pt.ulisboa.tecnico.tuplespaces.server.domain.ServerState;
@@ -62,25 +60,13 @@ public class ServiceImpl extends TupleSpacesReplicaGrpc.TupleSpacesReplicaImplBa
     @Override
     public void takePhase2(TakePhase2Request request, StreamObserver<TakePhase2Response> responseObserver) {
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "Received takePhase2 request from client: " + request.getClientId());
-        state.takePhase2(request.getClientId());
+        state.takePhase2(request.getClientId(), request.getSelectedTuple());
 
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "Processed takePhase2 for client: " + request.getClientId());
         TakePhase2Response response = TakePhase2Response.newBuilder().build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
         ServerMain.debug(ServiceImpl.class.getSimpleName(), "takePhase2 request completed for client: " + request.getClientId());
-    }
-
-    @Override
-    public void takePhase3(TakePhase3Request request, StreamObserver<TakePhase3Response> responseObserver) {
-        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Received takePhase3 request for tuple: " + request.getTuple() + " from client: " + request.getClientId());
-        state.takePhase3(request.getTuple(), request.getClientId());
-
-        ServerMain.debug(ServiceImpl.class.getSimpleName(), "Processed takePhase3 for client: " + request.getClientId());
-        TakePhase3Response response = TakePhase3Response.newBuilder().build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-        ServerMain.debug(ServiceImpl.class.getSimpleName(), "takePhase3 request completed for client: " + request.getClientId());
     }
 
     @Override

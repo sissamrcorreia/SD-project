@@ -30,13 +30,6 @@ message TakePhase2Request {
 message TakePhase2Response {
 }
 
-message TakePhase3Request {
-  string tuple = 1;
-  int32 clientId = 2;
-}
-message TakePhase3Response {
-}
-
 message getTupleSpacesStateRequest {}
 message getTupleSpacesStateResponse {
   repeated string tuple = 1;
@@ -47,6 +40,5 @@ service TupleSpacesReplica {
   rpc read(ReadRequest) returns (ReadResponse);
   rpc takePhase1(TakePhase1Request) returns (TakePhase1Response);
   rpc takePhase2(TakePhase2Request) returns (TakePhase2Response);
-  rpc takePhase3(TakePhase3Request) returns (TakePhase3Response);
   rpc getTupleSpacesState(getTupleSpacesStateRequest) returns (getTupleSpacesStateResponse);
 }

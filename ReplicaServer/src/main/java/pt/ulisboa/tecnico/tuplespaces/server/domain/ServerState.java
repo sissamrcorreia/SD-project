@@ -70,7 +70,7 @@ public class ServerState {
 
             ServerMain.debug(ServerState.class.getSimpleName(),
                 "{takePhase1} Tuple is locked: " + tupleEntry.getTuple());
-            takePhase2(clientId);
+            takePhase2(clientId, tupleEntry.getTuple());
             return new ArrayList<>();
 
           } else {
@@ -104,30 +104,27 @@ public class ServerState {
   }
 
   // Method to release locks held by a specific client
-  public synchronized void takePhase2(int clientId) {
+  public synchronized void takePhase2(int clientId, String tuple) {
     ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase2} Releasing locks for client: " + clientId);
+    Iterator<TupleEntry> iterator = this.tuples.iterator();
 
-    for (TupleEntry tupleEntry : this.tuples) {
+    ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase2} Iterator: " + iterator);
+
+    while (iterator.hasNext()) {
+      TupleEntry tupleEntry = iterator.next();
+      
       // Check if the tuple is locked by the given client
       if (tupleEntry.getLockedByClientID() == clientId) {
         tupleEntry.setLocked(false);
         tupleEntry.setLockedByClientID(-1);
+
+        // Remove the tuple from the tuple space for the specific client
+        if (tupleEntry.getTuple().equals(tuple)) {
+          iterator.remove();
+        }
       }
     }
-  }
-
-  // Method to remove a tuple from the tuple space for a specific client
-  public synchronized void takePhase3(String tuple, int clientId) {
-    ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase3} Removing tuple: " + tuple + " for client: " + clientId);
-    Iterator<TupleEntry> iterator = tuples.iterator();
-    while (iterator.hasNext()) {
-      TupleEntry tupleEntry = iterator.next();
-      if (tupleEntry.getTuple().equals(tuple)) {
-        iterator.remove();
-      }
-    }
-
-    ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase3} Tuple removed: " + tuple + " for client: " + clientId);
+    ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase2} Tuple removed: " + tuple + " for client: " + clientId);
   }
 
   public synchronized ArrayList<String> getTupleSpacesState() {

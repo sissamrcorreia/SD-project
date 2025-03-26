@@ -19,7 +19,6 @@ import pt.ulisboa.tecnico.tuplespaces.frontend.util.PutObserver;
 import pt.ulisboa.tecnico.tuplespaces.frontend.util.ReadObserver;
 import pt.ulisboa.tecnico.tuplespaces.frontend.util.TakePhase1Observer;
 import pt.ulisboa.tecnico.tuplespaces.frontend.util.TakePhase2Observer;
-import pt.ulisboa.tecnico.tuplespaces.frontend.util.TakePhase3Observer;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaGrpc;
 import pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract.TupleSpacesReplicaOuterClass;
 
@@ -213,28 +212,9 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
                 this.stub[i].takePhase2(phase2Request, phase2Observer);
             }
 
-            // Wait for responses from all replicas
-            phase2Collector.waitUntilAllReceived(numServers);
-            FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Phase 2 completed.");
-
-            // Phase 3: Release the critical section (Maekawa)
-            FrontEndResponseCollector phase3Collector = new FrontEndResponseCollector();
-            FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Starting Phase 3.");
-            TakePhase3Observer phase3Observer = new TakePhase3Observer(phase3Collector);
-
-            TupleSpacesReplicaOuterClass.TakePhase3Request phase3Request = TupleSpacesReplicaOuterClass.TakePhase3Request.newBuilder()
-                .setTuple(selectedTuple)
-                .setClientId(clientId)
-                .build();
-
-            for (int i = 0; i < numServers; i++) {
-                FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending Phase 3 request to server " + i);
-                this.stub[i].takePhase3(phase3Request, phase3Observer);
-            }
-
             // Wait for responses from all voters
-            phase3Collector.waitUntilAllReceived(voterSet.length);
-            FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Phase 3 completed.");
+            phase2Collector.waitUntilAllReceived(voterSet.length);
+            FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Phase 2 completed.");
 
             // Send the response back to the client
             TupleSpacesOuterClass.TakeResponse response = TupleSpacesOuterClass.TakeResponse.newBuilder()

@@ -14,6 +14,7 @@ public class TakePhase2Observer implements StreamObserver<TakePhase2Response> {
     @Override
     public void onNext(TakePhase2Response value) {
         collector.addString("OK");
+        FrontEndMain.debug(TakePhase2Observer.class.getSimpleName(), "Received getTupleSpaces response: " + value);
     }
 
     @Override
