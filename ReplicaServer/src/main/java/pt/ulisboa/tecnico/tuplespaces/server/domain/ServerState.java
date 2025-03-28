@@ -64,6 +64,8 @@ public class ServerState {
     while (tuplesNotFound) {
       for (TupleEntry tupleEntry : this.tuples) {
         if (tupleEntry.getTuple().matches(searchPattern)) {
+          ServerMain.debug(ServerState.class.getSimpleName(),
+              "{takePhase1} Found tuple matching pattern: " + searchPattern + " -> " + tupleEntry.getTuple());
 
           // If the tuple is locked, release all locks for the client and return an empty list
           if (tupleEntry.isLocked()) {
@@ -107,8 +109,6 @@ public class ServerState {
   public synchronized void takePhase2(int clientId, String tuple) {
     ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase2} Releasing locks for client: " + clientId);
     Iterator<TupleEntry> iterator = this.tuples.iterator();
-
-    ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase2} Iterator: " + iterator);
 
     while (iterator.hasNext()) {
       TupleEntry tupleEntry = iterator.next();
