@@ -176,15 +176,16 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
                 .setClientId(clientId)
                 .build();
 
-            for (int i = 0 ; i < numServers; i++) {
+            // Only send phase1 requests to the voter set, not all replicas
+            for (int serverIndex : voterSet) {
                 Metadata metadata = new Metadata();
-                metadata.put(Metadata.Key.of("delay", Metadata.ASCII_STRING_MARSHALLER), delays[i]);
-                FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending take request to server " + i + " with delay " + delays[i]);
+                metadata.put(Metadata.Key.of("delay", Metadata.ASCII_STRING_MARSHALLER), delays[serverIndex]);
+                FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending take request to voter server " + serverIndex + " with delay " + delays[serverIndex]);
 
-                TupleSpacesReplicaGrpc.TupleSpacesReplicaStub stubWithMetadata = this.stub[i]
+                TupleSpacesReplicaGrpc.TupleSpacesReplicaStub stubWithMetadata = this.stub[serverIndex]
                     .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
 
-                FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending Phase 1 request to server " + i);
+                FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending Phase 1 request to voter server " + serverIndex);
                 stubWithMetadata.takePhase1(phase1Request, phase1Observer);
             }
 
@@ -207,13 +208,15 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
                 .setClientId(clientId)
                 .build();
 
+            // Phase 2 requests are sent to ALL replicas for consistency
             for (int i = 0; i < numServers; i++) {
                 FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending Phase 2 request to server " + i);
                 this.stub[i].takePhase2(phase2Request, phase2Observer);
             }
 
             // Wait for responses from all voters
-            phase2Collector.waitUntilAllReceived(voterSet.length);
+            // phase2Collector.waitUntilAllReceived(voterSet.length);
+            phase2Collector.waitUntilAllReceived(numServers);
             FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Phase 2 completed.");
 
             // Send the response back to the client

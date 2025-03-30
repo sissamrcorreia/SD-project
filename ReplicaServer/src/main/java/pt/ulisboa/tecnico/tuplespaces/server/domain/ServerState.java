@@ -112,17 +112,21 @@ public class ServerState {
 
     while (iterator.hasNext()) {
       TupleEntry tupleEntry = iterator.next();
-      
-      // Check if the tuple is locked by the given client
-      if (tupleEntry.getLockedByClientID() == clientId) {
-        tupleEntry.setLocked(false);
-        tupleEntry.setLockedByClientID(-1);
 
-        // Remove the tuple from the tuple space for the specific client
-        if (tupleEntry.getTuple().equals(tuple)) {
-          iterator.remove();
+      // Remove the tuple from the tuple space for the specific client
+      if (tupleEntry.getTuple().equals(tuple)) {
+        if (tupleEntry.getLockedByClientID() != -1 && tupleEntry.getLockedByClientID() != clientId) {
+          continue; // Skip removing if the tuple is not locked by the client
         }
+
+        if (tupleEntry.getLockedByClientID() == clientId) {
+          tupleEntry.setLocked(false);
+          tupleEntry.setLockedByClientID(-1);
+        }
+
+        iterator.remove();
       }
+      
     }
     ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase2} Tuple removed: " + tuple + " for client: " + clientId);
   }
