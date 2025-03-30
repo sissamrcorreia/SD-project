@@ -71,7 +71,9 @@
 					<mainClass>${mainclass}</mainClass>
 					<arguments>
 						<argument>${frontend.port}</argument>
-						<argument>${server.hostport}</argument>
+						<argument>${server1.hostport}</argument>
+						<argument>${server2.hostport}</argument>
+						<argument>${server3.hostport}</argument>
 					</arguments>
 				</configuration>
 			</plugin>
