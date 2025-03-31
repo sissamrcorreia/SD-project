@@ -72,8 +72,9 @@ public class ServerState {
 
             ServerMain.debug(ServerState.class.getSimpleName(),
                 "{takePhase1} Tuple is locked: " + tupleEntry.getTuple());
-            takePhase2(clientId, tupleEntry.getTuple());
-            return new ArrayList<>();
+            //takePhase2(clientId, tupleEntry.getTuple());
+            //return new ArrayList<>();
+            continue;
 
           } else {
             // If the tuple is not locked, lock it for the client and add it to the result list
@@ -107,24 +108,31 @@ public class ServerState {
 
   // Method to release locks held by a specific client
   public synchronized void takePhase2(int clientId, String tuple) {
+    boolean removedTuples = false;
     ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase2} Releasing locks for client: " + clientId);
     Iterator<TupleEntry> iterator = this.tuples.iterator();
 
     while (iterator.hasNext()) {
       TupleEntry tupleEntry = iterator.next();
 
+      if (tupleEntry.getLockedByClientID() == clientId) {
+        ServerMain.debug(ServerState.class.getSimpleName(),
+            "{takePhase2} Releasing lock for tuple: " + tupleEntry.getTuple() + " for client: " + clientId);
+        tupleEntry.setLocked(false);
+        tupleEntry.setLockedByClientID(-1);
+      }
+
       // Remove the tuple from the tuple space for the specific client
       if (tupleEntry.getTuple().equals(tuple)) {
-        if (tupleEntry.getLockedByClientID() != -1 && tupleEntry.getLockedByClientID() != clientId) {
+        if (tupleEntry.isLocked() && tupleEntry.getLockedByClientID() != clientId) {
           continue; // Skip removing if the tuple is not locked by the client
         }
-
-        if (tupleEntry.getLockedByClientID() == clientId) {
-          tupleEntry.setLocked(false);
-          tupleEntry.setLockedByClientID(-1);
+        
+        if(!removedTuples) {
+          ServerMain.debug(ServerState.class.getSimpleName(), "{takePhase2} Removing tuple: " + tuple + " for client: " + clientId);
+          removedTuples = true;
+          iterator.remove();
         }
-
-        iterator.remove();
       }
       
     }
