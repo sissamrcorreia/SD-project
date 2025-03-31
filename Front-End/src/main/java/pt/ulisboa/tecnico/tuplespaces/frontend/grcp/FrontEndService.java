@@ -3,7 +3,6 @@ package pt.ulisboa.tecnico.tuplespaces.frontend.grcp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.grpc.Context;
 import io.grpc.ManagedChannel;
@@ -44,6 +43,29 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
         }
     }
 
+    // Retrieves the delay values from the current gRPC context for each server, using default "0" if no delay is specified.
+    // The delays are added to the metadata that will be attached to the requests.
+    private Metadata[] createMetadataForAllServers() {
+        String delay1 = DelayInterceptor.CTX_DELAY1.get(Context.current());
+        String delay2 = DelayInterceptor.CTX_DELAY2.get(Context.current());
+        String delay3 = DelayInterceptor.CTX_DELAY3.get(Context.current());
+
+        delay1 = delay1 == null ? "0" : delay1;
+        delay2 = delay2 == null ? "0" : delay2;
+        delay3 = delay3 == null ? "0" : delay3;
+
+        Metadata[] metadataArray = new Metadata[numServers];
+        String[] delays = {delay1, delay2, delay3};
+        
+        for (int i = 0; i < numServers; i++) {
+            Metadata metadata = new Metadata();
+            metadata.put(DELAY, delays[i]);
+            metadataArray[i] = metadata;
+        }
+        
+        return metadataArray;
+    }
+
     // Override the gRPC methods with proper signatures
     @Override
     public void put(TupleSpacesOuterClass.PutRequest request, StreamObserver<TupleSpacesOuterClass.PutResponse> responseObserver) {
@@ -55,28 +77,18 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
             FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded put request");
             PutObserver observer = new PutObserver(collector);
 
-            String delay1 = DelayInterceptor.CTX_DELAY1.get(Context.current());
-            String delay2 = DelayInterceptor.CTX_DELAY2.get(Context.current());
-            String delay3 = DelayInterceptor.CTX_DELAY3.get(Context.current());
-
-            delay1 = delay1 == null ? "0" : delay1;
-            delay2 = delay2 == null ? "0" : delay2;
-            delay3 = delay3 == null ? "0" : delay3;
-
-            String[] delays = {delay1, delay2, delay3};
+            Metadata[] metadataArray = createMetadataForAllServers();
 
             TupleSpacesReplicaOuterClass.PutRequest replicaRequest = TupleSpacesReplicaOuterClass.PutRequest.newBuilder()
                 .setNewTuple(request.getNewTuple())
                 .build();
 
             for (int i = 0; i < numServers; i++) {
-                Metadata metadata = new Metadata();
-                metadata.put(Metadata.Key.of("delay", Metadata.ASCII_STRING_MARSHALLER), delays[i]);
-                FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending put request to server " + i + " with delay " + delays[i]);
+                FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending put request to server " + i + " with delay " + metadataArray[i]);
 
                 TupleSpacesReplicaGrpc.TupleSpacesReplicaStub stubWithMetadata = this.stub[i]
-                    .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
-
+                    .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadataArray[i]));
+                
                 stubWithMetadata.put(replicaRequest, observer);
             }
 
@@ -105,15 +117,7 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
             FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded read request");
             ReadObserver observer = new ReadObserver(collector);
 
-            String delay1 = DelayInterceptor.CTX_DELAY1.get(Context.current());
-            String delay2 = DelayInterceptor.CTX_DELAY2.get(Context.current());
-            String delay3 = DelayInterceptor.CTX_DELAY3.get(Context.current());
-
-            delay1 = delay1 == null ? "0" : delay1;
-            delay2 = delay2 == null ? "0" : delay2;
-            delay3 = delay3 == null ? "0" : delay3;
-
-            String[] delays = {delay1, delay2, delay3};
+            Metadata[] metadataArray = createMetadataForAllServers();
 
             TupleSpacesReplicaOuterClass.ReadRequest replicaRequest = TupleSpacesReplicaOuterClass.ReadRequest.newBuilder()
                 .setSearchPattern(request.getSearchPattern())
@@ -121,12 +125,11 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
 
             for (int i = 0; i < numServers; i++) {
                 Metadata metadata = new Metadata();
-                metadata.put(Metadata.Key.of("delay", Metadata.ASCII_STRING_MARSHALLER), delays[i]);
-                FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending put request to server " + i + " with delay " + delays[i]);
+                FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending put request to server " + i + " with delay " + metadataArray[i]);
 
                 TupleSpacesReplicaGrpc.TupleSpacesReplicaStub stubWithMetadata = this.stub[i]
-                    .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
-
+                    .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadataArray[i]));
+                
                 stubWithMetadata.read(replicaRequest, observer);
             }
 
@@ -164,15 +167,7 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
             FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Forwarded take request");
             TakePhase1Observer phase1Observer = new TakePhase1Observer(phase1Collector);
 
-            String delay1 = DelayInterceptor.CTX_DELAY1.get(Context.current());
-            String delay2 = DelayInterceptor.CTX_DELAY2.get(Context.current());
-            String delay3 = DelayInterceptor.CTX_DELAY3.get(Context.current());
-
-            delay1 = delay1 == null ? "0" : delay1;
-            delay2 = delay2 == null ? "0" : delay2;
-            delay3 = delay3 == null ? "0" : delay3;
-
-            String[] delays = {delay1, delay2, delay3};
+            Metadata[] metadataArray = createMetadataForAllServers();
 
             TupleSpacesReplicaOuterClass.TakePhase1Request phase1Request = TupleSpacesReplicaOuterClass.TakePhase1Request.newBuilder()
                 .setSearchPattern(searchPattern)
@@ -182,13 +177,13 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
             // Only send phase1 requests to the voter set, not all replicas
             for (int serverIndex : voterSet) {
                 Metadata metadata = new Metadata();
-                metadata.put(Metadata.Key.of("delay", Metadata.ASCII_STRING_MARSHALLER), delays[serverIndex]);
-                FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending take request to voter server " + serverIndex + " with delay " + delays[serverIndex]);
+                FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending take request to voter server " + serverIndex + " with delay " + metadataArray[serverIndex]);
 
                 TupleSpacesReplicaGrpc.TupleSpacesReplicaStub stubWithMetadata = this.stub[serverIndex]
-                    .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
+                    .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadataArray[serverIndex]));
 
                 FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending Phase 1 request to voter server " + serverIndex);
+                
                 stubWithMetadata.takePhase1(phase1Request, phase1Observer);
             }
 
