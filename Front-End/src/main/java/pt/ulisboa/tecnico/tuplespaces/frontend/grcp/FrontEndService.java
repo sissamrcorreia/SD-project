@@ -1,6 +1,9 @@
 package pt.ulisboa.tecnico.tuplespaces.frontend.grcp;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import io.grpc.Context;
 import io.grpc.ManagedChannel;
@@ -193,9 +196,19 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
             phase1Collector.waitUntilAllReceived(voterSet.length);
             FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Phase 1 completed.");
 
+            // Find the intersection of all responses
+            // If there are no responses, the intersection is empty, if there are responses, find the intersection
+            List<List<String>> allResponses = phase1Collector.getAll();
+            List<String> intersection = allResponses.isEmpty()
+                ? Collections.emptyList()
+                : allResponses.stream()
+                    .collect(() -> new ArrayList<>(allResponses.get(0)),
+                        (list, response) -> list.retainAll(response),
+                        (list1, list2) -> list1.retainAll(list2)
+                    );
+
             // Select a tuple to take
-            List<String> reservedTuples = phase1Collector.getList(0);
-            String selectedTuple = reservedTuples.isEmpty() ? "" : reservedTuples.get(0);
+            String selectedTuple = intersection.isEmpty() ? "" : intersection.get(0);
             FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Selected tuple: " + selectedTuple);
 
             // Phase 2: Confirm the take operation
