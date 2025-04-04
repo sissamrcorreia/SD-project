@@ -1,0 +1,4 @@
+put <a,1>
+put <a,2>
+take <a,1>
+exit

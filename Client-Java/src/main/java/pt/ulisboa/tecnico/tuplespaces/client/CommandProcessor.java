@@ -170,7 +170,7 @@ public class CommandProcessor {
                 "- exit\n");
     }
 
-    private boolean inputIsValid(String[] input){ 
+    private boolean inputIsValid(String[] input){
         if (input.length < 2 // Checks for valid tuple structure for put, read and take
             ||
             !input[1].substring(0,1).equals(BGN_TUPLE)

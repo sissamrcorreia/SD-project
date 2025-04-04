@@ -1,0 +1,14 @@
+ClientMain
+> OK
+
+> OK
+
+> OK
+
+> OK
+ <x,apple,1>
+
+> OK
+[<x,banana,2>, <x,banana,2>, <x,banana,2>, <x,orange,3>, <x,orange,3>, <x,orange,3>]
+
+> 

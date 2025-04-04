@@ -18,7 +18,7 @@ public class ServerState {
     ServerMain.debug(ServerState.class.getSimpleName(), "Adding tuple: " + tuple);
     tuples.add(tuple);
 
-    // notify all waiting threads
+    // Notify all waiting threads
     notifyAll();
   }
 
@@ -38,9 +38,9 @@ public class ServerState {
     String tuple = getMatchingTuple(pattern);
     while (tuple == null) {
       try {
-        // release the lock and put the thread on hold
+        // Release the lock and put the thread on hold
         wait();
-        // when notified, reacquire lock and try again
+        // When notified, reacquire lock and try again
         tuple = getMatchingTuple(pattern);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
@@ -55,9 +55,9 @@ public class ServerState {
     String tuple = getMatchingTuple(pattern);
     while (tuple == null) {
       try {
-        // release the lock and put the thread on hold
+        // Release the lock and put the thread on hold
         wait();
-        // when notified, reacquire lock and try again
+        // When notified, reacquire lock and try again
         tuple = getMatchingTuple(pattern);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();

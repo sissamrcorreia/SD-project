@@ -1,0 +1,4 @@
+read <a,[0-9]>
+sleep 2
+take <a,2>
+exit

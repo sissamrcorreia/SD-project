@@ -1,0 +1,6 @@
+put <x,apple,1>
+put <x,banana,2>
+put <x,orange,3>
+take <x,[^,]+,[13]>
+getTupleSpacesState
+exit
