@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.tuplespaces.replicaXuLiskov.contract;
 
 message PutRequest {
   string newTuple = 1;
+  int32 clientId = 2;
 }
 message PutResponse {
 }
@@ -30,7 +31,10 @@ message TakePhase2Request {
 message TakePhase2Response {
 }
 
-message getTupleSpacesStateRequest {}
+message getTupleSpacesStateRequest {
+  int32 clientId = 1;
+}
+
 message getTupleSpacesStateResponse {
   repeated string tuple = 1;
 }

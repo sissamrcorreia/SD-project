@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.grpc.Context;
 import io.grpc.ManagedChannel;
@@ -33,9 +35,9 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
     static final int numServers = 3;
     static final Metadata.Key<String> DELAY = Metadata.Key.of("delay", Metadata.ASCII_STRING_MARSHALLER);
 
-    // Executor service to handle requests in a single thread
-    // This is used to ensure that the requests are processed in the order they are received.
-    private final ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
+    // Executor service to handle requests for each client in a single thread.
+    // This ensures that requests from the same client are processed in the order they are received.
+    private final ConcurrentMap<Integer, ExecutorService> perClientExecutors = new ConcurrentHashMap<>();
 
     public FrontEndService(String[] targets) {
         channels = new ManagedChannel[numServers];
@@ -81,9 +83,13 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
 
             Metadata[] metadataArray = createMetadataForAllServers();
 
+            FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Put Client ID: " + request);
+            
             TupleSpacesReplicaOuterClass.PutRequest replicaRequest = TupleSpacesReplicaOuterClass.PutRequest.newBuilder()
-                .setNewTuple(request.getNewTuple())
-                .build();
+            .setNewTuple(request.getNewTuple())
+            .build();
+            
+            FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending put request to all servers");
 
             for (int i = 0; i < numServers; i++) {
                 FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Sending put request to server " + i + " with delay " + metadataArray[i]);
@@ -202,7 +208,7 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
 
     public void processGetTupleSpacesStateRequest(TupleSpacesOuterClass.getTupleSpacesStateRequest request,
                                     StreamObserver<TupleSpacesOuterClass.getTupleSpacesStateResponse> responseObserver) {
-        try {                                
+        try {
             FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received getTupleSpacesState request");
             
             FrontEndResponseListsCollector collector = new FrontEndResponseListsCollector();
@@ -238,8 +244,14 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
     // Override the gRPC methods with proper signatures
     @Override
     public void put(TupleSpacesOuterClass.PutRequest request, StreamObserver<TupleSpacesOuterClass.PutResponse> responseObserver) {
-        singleThreadExecutor.execute(() -> processPutRequest(request, responseObserver));
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received put request: " + request);
+        int clientId = request.getClientId();
+        ExecutorService clientExecutor = perClientExecutors.computeIfAbsent(
+            clientId,
+            k -> Executors.newSingleThreadExecutor() // One executor per client
+            // This ensures that all requests from the same client are processed in order
+        );
+        clientExecutor.execute(() -> processPutRequest(request, responseObserver));
         return;
     }
 
@@ -288,16 +300,31 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
 
     @Override
     public void take(TupleSpacesOuterClass.TakeRequest request, StreamObserver<TupleSpacesOuterClass.TakeResponse> responseObserver) {
-        singleThreadExecutor.execute(() -> processTakeRequest(request, responseObserver));
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received take request: " + request);
+
+        int clientId = request.getClientId();
+        ExecutorService clientExecutor = perClientExecutors.computeIfAbsent(
+            clientId,
+            k -> Executors.newSingleThreadExecutor() // One executor per client
+            // This ensures that all requests from the same client are processed in order
+        );
+        clientExecutor.execute(() -> processTakeRequest(request, responseObserver));
         return;
     }
     
     @Override
     public void getTupleSpacesState(TupleSpacesOuterClass.getTupleSpacesStateRequest request,
                                     StreamObserver<TupleSpacesOuterClass.getTupleSpacesStateResponse> responseObserver) {
-        singleThreadExecutor.execute(() -> processGetTupleSpacesStateRequest(request, responseObserver));
         FrontEndMain.debug(FrontEndService.class.getSimpleName(), "Received getTupleSpacesState request: " + request);
+
+        int clientId = request.getClientId();
+        FrontEndMain.debug(FrontEndService.class.getSimpleName(), "GetTupleSpacesState Client ID: " + clientId);
+        ExecutorService clientExecutor = perClientExecutors.computeIfAbsent(
+            clientId,
+            k -> Executors.newSingleThreadExecutor() // One executor per client
+            // This ensures that all requests from the same client are processed in order
+        );
+        clientExecutor.execute(() -> processGetTupleSpacesStateRequest(request, responseObserver));
         return;
     }
 
@@ -307,6 +334,9 @@ public class FrontEndService extends TupleSpacesGrpc.TupleSpacesImplBase {
         for (int i = 0; i < numServers; i++) {
             this.channels[i].shutdownNow();
         }
-        singleThreadExecutor.shutdownNow();
+
+        for (ExecutorService executor : perClientExecutors.values()) {
+            executor.shutdownNow();
+        }
     }
 }

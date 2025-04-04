@@ -59,7 +59,7 @@ public class ClientService {
         _stub = addMetadataToStub(split);
       }
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " putting tuple " + tuple);
-      PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).build();
+      PutRequest request = PutRequest.newBuilder().setNewTuple(tuple).setClientId(client_id).build();
       _stub.put(request);
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " put tuple " + tuple);
       System.out.println("OK");
@@ -121,7 +121,7 @@ public class ClientService {
   public void getTupleSpacesState() {
     try {
       ClientMain.debug(ClientService.class.getSimpleName(), "Client " + client_id + " requested the full tuple space state");
-      getTupleSpacesStateRequest request = getTupleSpacesStateRequest.newBuilder().build();
+      getTupleSpacesStateRequest request = getTupleSpacesStateRequest.newBuilder().setClientId(client_id).build();
       getTupleSpacesStateResponse response = this.stub.getTupleSpacesState(request);
       ProtocolStringList TupleList = response.getTupleList();
 
